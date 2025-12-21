@@ -6,14 +6,16 @@
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 
 <style>
+/* ===== BASE ===== */
 body{
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
   padding:20px;
-  padding-bottom:340px;
   background:#f2f3f5;
   font-size:26px;
   line-height:1.9;
 }
+
+/* ===== CARD ===== */
 .sheet{
   background:#fff;
   padding:26px;
@@ -27,11 +29,15 @@ h2{font-size:40px;margin:0 0 20px}
   font-weight:bold;
   margin:30px 0 18px;
 }
+
+/* ===== GRID ===== */
 .grid-2{
   display:grid;
   grid-template-columns:1fr 1fr;
   gap:22px;
 }
+
+/* ===== OPTION ===== */
 .option{
   border:2px solid #e0e0e0;
   border-radius:22px;
@@ -50,18 +56,27 @@ h2{font-size:40px;margin:0 0 20px}
 /* ===== STICKY BAR ===== */
 .sticky-bar{
   position:fixed;
-  left:0;right:0;bottom:0;
+  left:0; right:0; bottom:0;
   background:#fff;
   padding:18px 20px 22px;
   box-shadow:0 -6px 16px rgba(0,0,0,.2);
   z-index:999;
+  transition:transform .25s ease, padding .25s ease;
 }
+
+/* โหมดย่อ */
+.sticky-bar.compact{
+  transform:translateY(70%);
+  padding:8px 16px;
+}
+
 .total-box{
   font-size:34px;
   font-weight:bold;
   text-align:center;
   margin-bottom:14px;
 }
+
 button{
   width:100%;
   padding:26px;
@@ -76,7 +91,7 @@ button{
 
 /* ===== POPUP ===== */
 .popup-bg{
-  position:fixed;inset:0;
+  position:fixed; inset:0;
   background:rgba(0,0,0,.6);
   display:none;
   align-items:center;
@@ -105,8 +120,8 @@ button{
 
 <div id="sheets"></div>
 
-<!-- STICKY -->
-<div class="sticky-bar">
+<!-- STICKY BAR -->
+<div class="sticky-bar" id="stickyBar">
   <div class="total-box">💰 ยอดรวม: <span id="total">0</span> บาท</div>
   <button class="btn-add" onclick="addSheet()">➕ เพิ่มแผ่น</button>
   <button class="btn-random" onclick="randomMenu()">🎲 เมนูสุ่ม</button>
@@ -128,31 +143,54 @@ const QR_URL="https://raw.githubusercontent.com/natchayonsit-cloud/crepe-order/m
 
 let sheetCount=0;
 let usedRandom=new Set();
+let lastScroll=0;
 
 window.onload=async()=>{
   await liff.init({liffId:LIFF_ID});
   addSheet();
   document.body.addEventListener("change",calcTotal);
+  adjustSafeArea();
 };
 
+/* ===== SAFE AREA ===== */
+function adjustSafeArea(){
+  const bar=document.getElementById("stickyBar");
+  document.body.style.paddingBottom=(bar.offsetHeight+40)+"px";
+}
+window.addEventListener("resize",adjustSafeArea);
+
+/* ===== SCROLL SHRINK ===== */
+window.addEventListener("scroll",()=>{
+  const bar=document.getElementById("stickyBar");
+  const cur=window.scrollY;
+  if(cur>lastScroll && cur>80){
+    bar.classList.add("compact");
+  }else{
+    bar.classList.remove("compact");
+  }
+  lastScroll=cur;
+});
+
+/* ===== POPUP ===== */
 function showPopup(msg){
   popupText.textContent=msg;
   popup.style.display="flex";
 }
 function closePopup(){ popup.style.display="none"; }
 
+/* ===== SHEET ===== */
 function addSheet(){
   sheetCount++;
   const d=document.createElement("div");
   d.className="sheet";
   d.innerHTML=getSheetHTML(sheetCount);
   sheets.appendChild(d);
+  adjustSafeArea();
 }
 
 /* ===== RANDOM SMART ===== */
 function randomMenu(){
   const i=sheetCount;
-
   const flour=["แป้งกรอบ|20","แป้งนิ่ม|20"];
   const jams=[
     "ช็อกโกแลต|0","สตรอว์เบอร์รี|0","วนิลา|0","ใบเตย|0",
@@ -167,15 +205,14 @@ function randomMenu(){
     "นมข้น|0","ช็อกโกแลต|0","ซอสพริก|0","มายองเนส|0","ซอสมะเขือเทศ|0","ไม่ราดซอส|0"
   ];
 
-  let key,tries=0;
-  do{
+  let tries=0;
+  while(tries<100){
     const f=pick(flour);
     const j=pick(jams);
     const s=pick(sauces);
-    const count=Math.floor(Math.random()*5)+1; // 1–5 ท็อป
-    const tops=shuffle([...toppings]).slice(0,count);
-
-    key=f+j+tops.join()+s;
+    const topCount=Math.floor(Math.random()*5)+1;
+    const tops=shuffle([...toppings]).slice(0,topCount);
+    const key=f+j+tops.join()+s;
     if(!usedRandom.has(key)){
       usedRandom.add(key);
       applyRandom(i,f,j,tops,s);
@@ -184,10 +221,9 @@ function randomMenu(){
       return;
     }
     tries++;
-  }while(tries<100);
-
+  }
   usedRandom.clear();
-  showPopup("สุ่มครบทุกสูตรแล้ว เริ่มสุ่มใหม่ได้อีก 🎉");
+  showPopup("สุ่มครบทุกสูตรแล้ว เริ่มใหม่ได้อีก 🎉");
 }
 
 function applyRandom(i,f,j,tops,s){
@@ -206,8 +242,8 @@ function applyRandom(i,f,j,tops,s){
   document.querySelector(`input[name="sauce${i}"][value="${s}"]`).checked=true;
 }
 
-function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
-function shuffle(a){ return a.sort(()=>Math.random()-0.5); }
+function pick(arr){return arr[Math.floor(Math.random()*arr.length)]}
+function shuffle(a){return a.sort(()=>Math.random()-0.5)}
 
 /* ===== TOTAL ===== */
 function calcTotal(){
@@ -274,4 +310,3 @@ async function sendOrder(){
 
 </body>
 </html>
-
