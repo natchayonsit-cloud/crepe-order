@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>สั่งเครป</title>
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<style>
+body { font-family: sans-serif; padding: 16px; }
+h2 { margin-top: 24px; }
+button { padding: 12px; font-size: 16px; width: 100%; background: #06c755; color: #fff; border: none; border-radius: 8px; }
+</style>
+</head>
+
+<body>
+
+<h2>🥞 เลือกแป้ง</h2>
+<input type="radio" name="base" value="แป้งกรอบ"> แป้งกรอบ<br>
+<input type="radio" name="base" value="แป้งนิ่ม"> แป้งนิ่ม<br>
+
+<h2>🍫 แยม</h2>
+<input type="radio" name="jam" value="นูเทลล่า"> นูเทลล่า<br>
+<input type="radio" name="jam" value="ช็อกโกแลต"> ช็อกโกแลต<br>
+<input type="radio" name="jam" value="สตรอว์เบอร์รี"> สตรอว์เบอร์รี<br>
+
+<h2>🍌 ท็อปปิ้ง</h2>
+<input type="checkbox" value="กล้วย"> กล้วย<br>
+<input type="checkbox" value="ชีส"> ชีส<br>
+<input type="checkbox" value="ไข่"> ไข่<br>
+
+<h2>🍯 ซอส</h2>
+<input type="checkbox" value="นมข้น"> นมข้น<br>
+<input type="checkbox" value="ช็อกโกแลต"> ช็อกโกแลต<br>
+
+<br>
+<button onclick="sendOrder()">ยืนยันสั่งเครป</button>
+
+<script>
+async function sendOrder() {
+  await liff.init({ liffId: "2008739884-Ml1lkrcK" });
+
+  let base = document.querySelector('input[name="base"]:checked');
+  let jam = document.querySelector('input[name="jam"]:checked');
+  let toppings = Array.from(document.querySelectorAll('input[type="checkbox"]:checked'))
+                      .map(el => el.value)
+                      .join(", ");
+
+  let message =
+`🧾 สรุปรายการสั่งเครป
+แป้ง: ${base ? base.value : "-"}
+แยม: ${jam ? jam.value : "-"}
+ท็อปปิ้ง: ${toppings || "-"}
+
+📌 รอร้านยืนยันราคา`;
+
+  if (liff.isInClient()) {
+    await liff.sendMessages([{ type: "text", text: message }]);
+    liff.closeWindow();
+  }
+}
+</script>
+
+</body>
+</html>
