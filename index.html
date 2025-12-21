@@ -3,148 +3,187 @@
 <head>
 <meta charset="UTF-8">
 <title>สั่งเครป</title>
+
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 
 <style>
-body { font-family: sans-serif; padding: 16px; }
+body {
+  font-family: sans-serif;
+  padding: 16px;
+  background: #f7f7f7;
+}
+
+h2 {
+  margin: 16px 0 8px;
+}
+
 .sheet {
-  border:2px solid #ddd;
-  border-radius:10px;
-  padding:12px;
-  margin-bottom:16px;
+  background: #fff;
+  padding: 12px;
+  border-radius: 10px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
 }
-h2,h3 { margin:8px 0; }
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 12px;
+}
+
+.option {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 8px;
+  font-size: 14px;
+}
+
+.option input {
+  margin-right: 6px;
+}
+
 button {
-  width:100%;
-  padding:14px;
-  font-size:16px;
-  border:none;
-  border-radius:8px;
-  background:#06c755;
-  color:#fff;
-  margin-top:10px;
+  padding: 14px;
+  font-size: 16px;
+  width: 100%;
+  border-radius: 8px;
+  border: none;
+  margin-top: 10px;
 }
-.btn-gray { background:#999; }
-#qrBox {
-  display:none;
-  text-align:center;
-  margin-top:20px;
+
+.btn-add {
+  background: #ddd;
 }
-#qrBox img {
-  max-width:260px;
+
+.btn-submit {
+  background: #06c755;
+  color: #fff;
 }
-small { color:#666; }
 </style>
 </head>
 
 <body>
 
-<h1>🥞 สั่งเครป</h1>
-
 <div id="sheets"></div>
 
-<button onclick="addSheet()">➕ เพิ่มแผ่น</button>
-<button class="btn-gray" onclick="removeSheet()">➖ ลบแผ่น</button>
-<button onclick="previewOrder()">💳 สรุป & ชำระเงิน</button>
-
-<div id="qrBox">
-  <h2>📌 กรุณาชำระเงิน</h2>
-  <p id="totalText"></p>
-  <img src="https://i.imgur.com/XXXXXXX.jpg" alt="PromptPay QR">
-  <!-- ⬆️ ใส่ URL รูป QR ของคุณตรงนี้ -->
-  <button onclick="sendOrder()">✅ ยืนยันออเดอร์</button>
-</div>
+<button class="btn-add" onclick="addSheet()">➕ เพิ่มแผ่น</button>
+<button class="btn-submit" onclick="sendOrder()">🧾 สรุป & ชำระเงิน</button>
 
 <script>
 const LIFF_ID = "2008739884-92cBWC4G";
-const MAX_SHEET = 4;
 let sheetCount = 0;
-let finalMessage = "";
-let finalTotal = 0;
 
 window.onload = async () => {
   await liff.init({ liffId: LIFF_ID });
   addSheet();
 };
 
-const flour = [["แป้งกรอบ",20],["แป้งนิ่ม",20]];
-const jam = [["ช็อกโกแลต",0],["สตรอว์เบอร์รี",0],["วนิลา",0],["ใบเตย",0],
-["ส้ม",0],["ชาไทย",0],["บลูเบอร์รี",0],["พริกเผา",0],["นูเทลล่า",15]];
-const topping = [
-["กล้วย",5],["คอนเฟลก",5],["โกโก้ครั้นช์",5],["โอริโอ้บด",5],["ลูกเกด",5],
+function addSheet() {
+  sheetCount++;
+  const div = document.createElement("div");
+  div.className = "sheet";
+  div.innerHTML = getSheetHTML(sheetCount);
+  document.getElementById("sheets").appendChild(div);
+}
+
+function getSheetHTML(i) {
+return `
+<h2>🥞 แผ่นที่ ${i}</h2>
+
+<b>แป้ง (เลือก 1)</b>
+<div class="grid-2">
+<label class="option"><input type="radio" name="flour${i}" value="แป้งกรอบ|20">แป้งกรอบ (20)</label>
+<label class="option"><input type="radio" name="flour${i}" value="แป้งนิ่ม|20">แป้งนิ่ม (20)</label>
+</div>
+
+<b>🍫 แยม (เลือกได้ 1–2)</b>
+<div class="grid-2">
+${jamList(i)}
+</div>
+
+<b>🍌 ท็อปปิ้ง (เลือกได้ 1–5)</b>
+<div class="grid-2">
+${toppingList(i)}
+</div>
+
+<b>🧀 ซอส (เลือกได้ 1–3)</b>
+<div class="grid-2">
+${sauceList(i)}
+</div>
+`;
+}
+
+function jamList(i) {
+const jams = [
+["ช็อกโกแลต",0],["สตรอว์เบอร์รี",0],["วนิลา",0],["ใบเตย",0],
+["ส้ม",0],["ชาไทย",0],["บลูเบอร์รี",0],["พริกเผา",0],
+["นูเทลล่า",15]
+];
+return jams.map(j =>
+`<label class="option"><input type="checkbox" name="jam${i}" value="${j[0]}|${j[1]}">${j[0]} ${j[1]?`(+${j[1]})`:""}</label>`
+).join("");
+}
+
+function toppingList(i) {
+const t = [
+["กล้วย",5],["ลูกเกด",5],["คอนเฟลก",5],["โกโก้ครั้นช์",5],["โอริโอ้บด",5],
 ["ฝอยทอง",10],["เม็ดมะม่วง",10],["เยลลี่แดง",10],["มาร์ชเมลโล",10],
 ["หมูหยอง",10],["ไส้กรอก",10],["ปูอัด",10],["ชีส",10],["ไข่",10],["แฮม",10]
 ];
-const sauce = [["นมข้น",0],["ช็อกโกแลต",0],["ซอสพริก",0],
-["มายองเนส",0],["ซอสมะเขือเทศ",0],["ไม่ราดซอส",0]];
-
-function addSheet(){
-  if(sheetCount>=MAX_SHEET) return alert("สูงสุด 4 แผ่น");
-  sheetCount++;
-  let n=sheetCount;
-  let html=`<div class="sheet" id="sheet${n}">
-  <h2>📄 แผ่นที่ ${n}</h2>
-
-  <h3>🥞 แป้ง</h3>
-  ${flour.map(f=>`<input type="radio" name="flour${n}" value="${f[0]}|${f[1]}"> ${f[0]} (${f[1]})<br>`).join("")}
-
-  <h3>🍫 แยม <small>(≤2)</small></h3>
-  ${jam.map(j=>`<input type="checkbox" name="jam${n}" value="${j[0]}|${j[1]}"> ${j[0]} ${j[1]?`(+${j[1]})`:""}<br>`).join("")}
-
-  <h3>🍌 ท็อปปิ้ง <small>(≤5)</small></h3>
-  ${topping.map(t=>`<input type="checkbox" name="top${n}" value="${t[0]}|${t[1]}"> ${t[0]} (+${t[1]})<br>`).join("")}
-
-  <h3>🧀 ซอส <small>(≤3)</small></h3>
-  ${sauce.map(s=>`<input type="checkbox" name="sauce${n}" value="${s[0]}|${s[1]}"> ${s[0]}<br>`).join("")}
-  </div>`;
-  sheets.insertAdjacentHTML("beforeend",html);
+return t.map(x =>
+`<label class="option"><input type="checkbox" name="topping${i}" value="${x[0]}|${x[1]}">${x[0]} (+${x[1]})</label>`
+).join("");
 }
 
-function removeSheet(){
-  if(sheetCount<=1) return;
-  document.getElementById(`sheet${sheetCount}`).remove();
-  sheetCount--;
+function sauceList(i) {
+const s = ["นมข้น","ช็อกโกแลต","ซอสพริก","มายองเนส","ซอสมะเขือเทศ","ไม่ราดซอส"];
+return s.map(x =>
+`<label class="option"><input type="checkbox" name="sauce${i}" value="${x}|0">${x}</label>`
+).join("");
 }
 
-function parse(v){let[a,b]=v.split("|");return{name:a,price:+b};}
-function checked(n){return document.querySelectorAll(`input[name="${n}"]:checked`);}
-
-function previewOrder(){
-  let msg="🧾 สรุปรายการสั่งเครป\n\n";
-  let grand=0;
-
-  for(let i=1;i<=sheetCount;i++){
-    let f=document.querySelector(`input[name="flour${i}"]:checked`);
-    if(!f) return alert(`เลือกแป้ง แผ่นที่ ${i}`);
-
-    if(checked(`jam${i}`).length>2) return alert(`แยมเกิน 2 (แผ่น ${i})`);
-    if(checked(`top${i}`).length>5) return alert(`ท็อปปิ้งเกิน 5 (แผ่น ${i})`);
-    if(checked(`sauce${i}`).length>3) return alert(`ซอสเกิน 3 (แผ่น ${i})`);
-
-    let sum=0;
-    let F=parse(f.value); sum+=F.price;
-
-    let J=[],T=[],S=[];
-    checked(`jam${i}`).forEach(e=>{let x=parse(e.value);J.push(x.name);sum+=x.price;});
-    checked(`top${i}`).forEach(e=>{let x=parse(e.value);T.push(x.name);sum+=x.price;});
-    checked(`sauce${i}`).forEach(e=>S.push(parse(e.value).name));
-
-    grand+=sum;
-
-    msg+=`📄 แผ่นที่ ${i}\n🥞 ${F.name}\n🍫 ${J.join(",")||"-"}\n🍌 ${T.join(",")||"-"}\n🧀 ${S.join(",")||"-"}\n💰 ${sum} บาท\n\n`;
-  }
-
-  msg+=`💳 รวมทั้งหมด ${grand} บาท`;
-  finalMessage=msg;
-  finalTotal=grand;
-
-  document.getElementById("totalText").innerText=`ยอดที่ต้องชำระ ${grand} บาท`;
-  document.getElementById("qrBox").style.display="block";
+function parseItem(v) {
+const [n,p] = v.split("|");
+return {name:n, price:+p};
 }
 
-async function sendOrder(){
-  await liff.sendMessages([{type:"text",text:finalMessage+"\n📌 ชำระแล้ว กรุณารอร้านยืนยันครับ"}]);
-  liff.closeWindow();
+async function sendOrder() {
+if (!liff.isInClient()) return alert("กรุณาเปิดผ่าน LINE");
+
+let total = 0;
+let text = "🧾 สรุปรายการสั่งเครป\n";
+
+for (let i=1;i<=sheetCount;i++) {
+let flour = document.querySelector(`input[name="flour${i}"]:checked`);
+if (!flour) return alert(`กรุณาเลือกแป้ง แผ่นที่ ${i}`);
+
+let f = parseItem(flour.value);
+total += f.price;
+
+let jams=[], tops=[], sauces=[];
+document.querySelectorAll(`input[name="jam${i}"]:checked`).forEach(e=>{
+let x=parseItem(e.value); jams.push(x.name); total+=x.price;
+});
+document.querySelectorAll(`input[name="topping${i}"]:checked`).forEach(e=>{
+let x=parseItem(e.value); tops.push(x.name); total+=x.price;
+});
+document.querySelectorAll(`input[name="sauce${i}"]:checked`).forEach(e=>{
+sauces.push(e.value.split("|")[0]);
+});
+
+text += `
+🍽 แผ่นที่ ${i}
+🥞 แป้ง: ${f.name}
+🍫 แยม: ${jams.join(", ")||"-"}
+🍌 ท็อปปิ้ง: ${tops.join(", ")||"-"}
+🧀 ซอส: ${sauces.join(", ")||"-"}
+`;
+}
+
+text += `\n💰 ราคารวมทั้งหมด: ${total} บาท\n📌 ทางร้านจะยืนยันออเดอร์อีกครั้งครับ`;
+
+await liff.sendMessages([{type:"text", text}]);
+liff.closeWindow();
 }
 </script>
 
