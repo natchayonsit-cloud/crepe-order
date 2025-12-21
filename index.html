@@ -151,6 +151,7 @@ let total = 0;
 let text = "🧾 สรุปรายการสั่งเครป\n";
 
 for (let i=1;i<=sheetCount;i++) {
+
   if (
     !checkLimit(`jam${i}`,2,"แยม (แผ่นที่ "+i+")") ||
     !checkLimit(`topping${i}`,5,"ท็อปปิ้ง (แผ่นที่ "+i+")") ||
@@ -195,11 +196,12 @@ await liff.sendMessages([
   { type: "image", originalContentUrl: QR_URL, previewImageUrl: QR_URL }
 ]);
 
-liff.closeWindow();
+// ✅ แก้ตรงนี้: หน่วงเวลาก่อนปิด
+setTimeout(() => {
+  liff.closeWindow();
+}, 900);
 }
 </script>
 
 </body>
 </html>
-
-
