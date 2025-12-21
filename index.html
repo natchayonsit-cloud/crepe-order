@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <title>สั่งเครป</title>
 
-<!-- LIFF SDK -->
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 
 <style>
@@ -19,57 +18,65 @@ button {
   border: none;
   border-radius: 8px;
 }
+.sheet {
+  border: 2px solid #ddd;
+  padding: 12px;
+  margin-bottom: 24px;
+  border-radius: 8px;
+}
 </style>
 </head>
 
 <body>
 
-<!-- ================= แป้ง ================= -->
-<h2>🥞 เลือกแป้ง (เลือก 1)</h2>
-<input type="radio" name="flour" value="แป้งกรอบ|20"> แป้งกรอบ (20)<br>
-<input type="radio" name="flour" value="แป้งนิ่ม|20"> แป้งนิ่ม (20)<br>
+<h1>🥞 สั่งเครป</h1>
 
-<!-- ================= แยม ================= -->
-<h2>🍫 แยม (เลือกได้ 1–2 อย่าง)</h2>
-<input type="checkbox" name="jam" value="ช็อกโกแลต|0"> ช็อกโกแลต (+0)<br>
-<input type="checkbox" name="jam" value="สตรอว์เบอร์รี|0"> สตรอว์เบอร์รี (+0)<br>
-<input type="checkbox" name="jam" value="วนิลา|0"> วนิลา (+0)<br>
-<input type="checkbox" name="jam" value="ใบเตย|0"> ใบเตย (+0)<br>
-<input type="checkbox" name="jam" value="ส้ม|0"> ส้ม (+0)<br>
-<input type="checkbox" name="jam" value="ชาไทย|0"> ชาไทย (+0)<br>
-<input type="checkbox" name="jam" value="บลูเบอร์รี|0"> บลูเบอร์รี (+0)<br>
-<input type="checkbox" name="jam" value="พริกเผา|0"> พริกเผา (+0)<br>
-<input type="checkbox" name="jam" value="นูเทลล่า|15"> นูเทลล่า (+15)<br>
+<!-- ================= แผ่นที่ 1 ================= -->
+<div class="sheet">
+<h2>📄 แผ่นที่ 1</h2>
 
-<!-- ================= ท็อปปิ้ง ================= -->
-<h2>🍌 ท็อปปิ้ง (เลือกได้ 1–5 อย่าง)</h2>
-<input type="checkbox" name="topping" value="กล้วย|5"> กล้วย (+5)<br>
-<input type="checkbox" name="topping" value="คอนเฟลก|5"> คอนเฟลก (+5)<br>
-<input type="checkbox" name="topping" value="โกโก้ครั้นช์|5"> โกโก้ครั้นช์ (+5)<br>
-<input type="checkbox" name="topping" value="โอริโอ้บด|5"> โอริโอ้บด (+5)<br>
-<input type="checkbox" name="topping" value="ลูกเกด|5"> ⭐ ลูกเกด (+5)<br>
+<h3>🥞 แป้ง (เลือก 1)</h3>
+<input type="radio" name="flour1" value="แป้งกรอบ|20"> แป้งกรอบ (20)<br>
+<input type="radio" name="flour1" value="แป้งนิ่ม|20"> แป้งนิ่ม (20)<br>
 
-<input type="checkbox" name="topping" value="ฝอยทอง|10"> ฝอยทอง (+10)<br>
-<input type="checkbox" name="topping" value="เม็ดมะม่วง|10"> เม็ดมะม่วง (+10)<br>
-<input type="checkbox" name="topping" value="เยลลี่แดง|10"> เยลลี่แดง (+10)<br>
-<input type="checkbox" name="topping" value="มาร์ชเมลโล|10"> มาร์ชเมลโล (+10)<br>
-<input type="checkbox" name="topping" value="หมูหยอง|10"> หมูหยอง (+10)<br>
-<input type="checkbox" name="topping" value="ไส้กรอก|10"> ไส้กรอก (+10)<br>
-<input type="checkbox" name="topping" value="ปูอัด|10"> ปูอัด (+10)<br>
-<input type="checkbox" name="topping" value="ชีส|10"> ชีส (+10)<br>
-<input type="checkbox" name="topping" value="ไข่|10"> ไข่ (+10)<br>
-<input type="checkbox" name="topping" value="แฮม|10"> แฮม (+10)<br>
+<h3>🍫 แยม (เลือกได้ไม่เกิน 2)</h3>
+<label><input type="checkbox" name="jam1" value="ช็อกโกแลต|0"> ช็อกโกแลต</label><br>
+<label><input type="checkbox" name="jam1" value="สตรอว์เบอร์รี|0"> สตรอว์เบอร์รี</label><br>
+<label><input type="checkbox" name="jam1" value="วนิลา|0"> วนิลา</label><br>
+<label><input type="checkbox" name="jam1" value="ใบเตย|0"> ใบเตย</label><br>
+<label><input type="checkbox" name="jam1" value="ส้ม|0"> ส้ม</label><br>
+<label><input type="checkbox" name="jam1" value="ชาไทย|0"> ชาไทย</label><br>
+<label><input type="checkbox" name="jam1" value="บลูเบอร์รี|0"> บลูเบอร์รี</label><br>
+<label><input type="checkbox" name="jam1" value="พริกเผา|0"> พริกเผา</label><br>
+<label><input type="checkbox" name="jam1" value="นูเทลล่า|15"> นูเทลล่า (+15)</label><br>
 
-<!-- ================= ซอส ================= -->
-<h2>🧀 ซอส (เลือกได้ 1–3 อย่าง)</h2>
-<input type="checkbox" name="sauce" value="นมข้น|0"> นมข้น<br>
-<input type="checkbox" name="sauce" value="ช็อกโกแลต|0"> ช็อกโกแลต<br>
-<input type="checkbox" name="sauce" value="ซอสพริก|0"> ซอสพริก<br>
-<input type="checkbox" name="sauce" value="มายองเนส|0"> มายองเนส<br>
-<input type="checkbox" name="sauce" value="ซอสมะเขือเทศ|0"> ซอสมะเขือเทศ<br>
-<input type="checkbox" name="sauce" value="ไม่ราดซอส|0"> ไม่ราดซอส<br>
+<h3>🍌 ท็อปปิ้ง (เลือกได้ไม่เกิน 5)</h3>
+<label><input type="checkbox" name="topping1" value="กล้วย|5"> กล้วย (+5)</label><br>
+<label><input type="checkbox" name="topping1" value="คอนเฟลก|5"> คอนเฟลก (+5)</label><br>
+<label><input type="checkbox" name="topping1" value="โกโก้ครั้นช์|5"> โกโก้ครั้นช์ (+5)</label><br>
+<label><input type="checkbox" name="topping1" value="โอริโอ้บด|5"> โอริโอ้บด (+5)</label><br>
+<label><input type="checkbox" name="topping1" value="ลูกเกด|5"> ลูกเกด (+5)</label><br>
 
-<br>
+<label><input type="checkbox" name="topping1" value="ฝอยทอง|10"> ฝอยทอง (+10)</label><br>
+<label><input type="checkbox" name="topping1" value="เม็ดมะม่วง|10"> เม็ดมะม่วง (+10)</label><br>
+<label><input type="checkbox" name="topping1" value="เยลลี่แดง|10"> เยลลี่แดง (+10)</label><br>
+<label><input type="checkbox" name="topping1" value="มาร์ชเมลโล|10"> มาร์ชเมลโล (+10)</label><br>
+<label><input type="checkbox" name="topping1" value="หมูหยอง|10"> หมูหยอง (+10)</label><br>
+<label><input type="checkbox" name="topping1" value="ไส้กรอก|10"> ไส้กรอก (+10)</label><br>
+<label><input type="checkbox" name="topping1" value="ปูอัด|10"> ปูอัด (+10)</label><br>
+<label><input type="checkbox" name="topping1" value="ชีส|10"> ชีส (+10)</label><br>
+<label><input type="checkbox" name="topping1" value="ไข่|10"> ไข่ (+10)</label><br>
+<label><input type="checkbox" name="topping1" value="แฮม|10"> แฮม (+10)</label><br>
+
+<h3>🧀 ซอส (เลือกได้ไม่เกิน 3)</h3>
+<label><input type="checkbox" name="sauce1" value="นมข้น|0"> นมข้น</label><br>
+<label><input type="checkbox" name="sauce1" value="ช็อกโกแลต|0"> ช็อกโกแลต</label><br>
+<label><input type="checkbox" name="sauce1" value="ซอสพริก|0"> ซอสพริก</label><br>
+<label><input type="checkbox" name="sauce1" value="มายองเนส|0"> มายองเนส</label><br>
+<label><input type="checkbox" name="sauce1" value="ซอสมะเขือเทศ|0"> ซอสมะเขือเทศ</label><br>
+<label><input type="checkbox" name="sauce1" value="ไม่ราดซอส|0"> ไม่ราดซอส</label><br>
+</div>
+
 <button onclick="sendOrder()">ยืนยันสั่งเครป</button>
 
 <script>
@@ -79,9 +86,18 @@ window.onload = async () => {
   await liff.init({ liffId: LIFF_ID });
 };
 
-function parseItem(value) {
-  const [name, price] = value.split("|");
-  return { name, price: Number(price) };
+function parseItem(v) {
+  const [n, p] = v.split("|");
+  return { name: n, price: Number(p) };
+}
+
+function limitCheck(name, max, label) {
+  const c = document.querySelectorAll(`input[name="${name}"]:checked`).length;
+  if (c > max) {
+    alert(`${label} เลือกได้ไม่เกิน ${max} อย่าง`);
+    return false;
+  }
+  return true;
 }
 
 async function sendOrder() {
@@ -90,9 +106,14 @@ async function sendOrder() {
     return;
   }
 
-  let total = 0;
+  if (
+    !limitCheck("jam1", 2, "แยม") ||
+    !limitCheck("topping1", 5, "ท็อปปิ้ง") ||
+    !limitCheck("sauce1", 3, "ซอส")
+  ) return;
 
-  let flourEl = document.querySelector('input[name="flour"]:checked');
+  let total = 0;
+  let flourEl = document.querySelector('input[name="flour1"]:checked');
   if (!flourEl) {
     alert("กรุณาเลือกแป้ง");
     return;
@@ -101,28 +122,20 @@ async function sendOrder() {
   let flour = parseItem(flourEl.value);
   total += flour.price;
 
-  let jams = [];
-  document.querySelectorAll('input[name="jam"]:checked').forEach(el => {
-    let item = parseItem(el.value);
-    jams.push(item.name);
-    total += item.price;
+  let jams=[], toppings=[], sauces=[];
+  document.querySelectorAll('input[name="jam1"]:checked').forEach(e=>{
+    let i=parseItem(e.value); jams.push(i.name); total+=i.price;
+  });
+  document.querySelectorAll('input[name="topping1"]:checked').forEach(e=>{
+    let i=parseItem(e.value); toppings.push(i.name); total+=i.price;
+  });
+  document.querySelectorAll('input[name="sauce1"]:checked').forEach(e=>{
+    sauces.push(parseItem(e.value).name);
   });
 
-  let toppings = [];
-  document.querySelectorAll('input[name="topping"]:checked').forEach(el => {
-    let item = parseItem(el.value);
-    toppings.push(item.name);
-    total += item.price;
-  });
-
-  let sauces = [];
-  document.querySelectorAll('input[name="sauce"]:checked').forEach(el => {
-    let item = parseItem(el.value);
-    sauces.push(item.name);
-  });
-
-  let message =
+  let msg =
 `🧾 สรุปรายการสั่งเครป
+📄 แผ่นที่ 1
 🥞 แป้ง: ${flour.name}
 🍫 แยม: ${jams.join(", ") || "-"}
 🍌 ท็อปปิ้ง: ${toppings.join(", ") || "-"}
@@ -131,10 +144,7 @@ async function sendOrder() {
 💰 ราคารวม: ${total} บาท
 📌 ทางร้านจะยืนยันออเดอร์อีกครั้งครับ`;
 
-  await liff.sendMessages([
-    { type: "text", text: message }
-  ]);
-
+  await liff.sendMessages([{ type: "text", text: msg }]);
   liff.closeWindow();
 }
 </script>
