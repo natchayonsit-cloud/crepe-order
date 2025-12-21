@@ -24,23 +24,50 @@ button {
 
 <body>
 
-<h2>🥞 เลือกแป้ง</h2>
+<!-- ================= แป้ง ================= -->
+<h2>🥞 เลือกแป้ง (เลือก 1)</h2>
 <input type="radio" name="flour" value="แป้งกรอบ|20"> แป้งกรอบ (20)<br>
 <input type="radio" name="flour" value="แป้งนิ่ม|20"> แป้งนิ่ม (20)<br>
 
-<h2>🍫 แยม</h2>
-<input type="radio" name="jam" value="นูเทลล่า|15"> นูเทลล่า (+15)<br>
-<input type="radio" name="jam" value="ช็อกโกแลต|0"> ช็อกโกแลต<br>
-<input type="radio" name="jam" value="สตรอว์เบอร์รี|0"> สตรอว์เบอร์รี<br>
+<!-- ================= แยม ================= -->
+<h2>🍫 แยม (เลือกได้ 1–2 อย่าง)</h2>
+<input type="checkbox" name="jam" value="ช็อกโกแลต|0"> ช็อกโกแลต (+0)<br>
+<input type="checkbox" name="jam" value="สตรอว์เบอร์รี|0"> สตรอว์เบอร์รี (+0)<br>
+<input type="checkbox" name="jam" value="วนิลา|0"> วนิลา (+0)<br>
+<input type="checkbox" name="jam" value="ใบเตย|0"> ใบเตย (+0)<br>
+<input type="checkbox" name="jam" value="ส้ม|0"> ส้ม (+0)<br>
+<input type="checkbox" name="jam" value="ชาไทย|0"> ชาไทย (+0)<br>
+<input type="checkbox" name="jam" value="บลูเบอร์รี|0"> บลูเบอร์รี (+0)<br>
+<input type="checkbox" name="jam" value="พริกเผา|0"> พริกเผา (+0)<br>
+<input type="checkbox" name="jam" value="นูเทลล่า|15"> นูเทลล่า (+15)<br>
 
-<h2>🍌 ท็อปปิ้ง</h2>
+<!-- ================= ท็อปปิ้ง ================= -->
+<h2>🍌 ท็อปปิ้ง (เลือกได้ 1–5 อย่าง)</h2>
 <input type="checkbox" name="topping" value="กล้วย|5"> กล้วย (+5)<br>
+<input type="checkbox" name="topping" value="คอนเฟลก|5"> คอนเฟลก (+5)<br>
+<input type="checkbox" name="topping" value="โกโก้ครั้นช์|5"> โกโก้ครั้นช์ (+5)<br>
+<input type="checkbox" name="topping" value="โอริโอ้บด|5"> โอริโอ้บด (+5)<br>
+<input type="checkbox" name="topping" value="ลูกเกด|5"> ⭐ ลูกเกด (+5)<br>
+
+<input type="checkbox" name="topping" value="ฝอยทอง|10"> ฝอยทอง (+10)<br>
+<input type="checkbox" name="topping" value="เม็ดมะม่วง|10"> เม็ดมะม่วง (+10)<br>
+<input type="checkbox" name="topping" value="เยลลี่แดง|10"> เยลลี่แดง (+10)<br>
+<input type="checkbox" name="topping" value="มาร์ชเมลโล|10"> มาร์ชเมลโล (+10)<br>
+<input type="checkbox" name="topping" value="หมูหยอง|10"> หมูหยอง (+10)<br>
+<input type="checkbox" name="topping" value="ไส้กรอก|10"> ไส้กรอก (+10)<br>
+<input type="checkbox" name="topping" value="ปูอัด|10"> ปูอัด (+10)<br>
 <input type="checkbox" name="topping" value="ชีส|10"> ชีส (+10)<br>
 <input type="checkbox" name="topping" value="ไข่|10"> ไข่ (+10)<br>
+<input type="checkbox" name="topping" value="แฮม|10"> แฮม (+10)<br>
 
-<h2>🍯 ซอส</h2>
+<!-- ================= ซอส ================= -->
+<h2>🧀 ซอส (เลือกได้ 1–3 อย่าง)</h2>
 <input type="checkbox" name="sauce" value="นมข้น|0"> นมข้น<br>
 <input type="checkbox" name="sauce" value="ช็อกโกแลต|0"> ช็อกโกแลต<br>
+<input type="checkbox" name="sauce" value="ซอสพริก|0"> ซอสพริก<br>
+<input type="checkbox" name="sauce" value="มายองเนส|0"> มายองเนส<br>
+<input type="checkbox" name="sauce" value="ซอสมะเขือเทศ|0"> ซอสมะเขือเทศ<br>
+<input type="checkbox" name="sauce" value="ไม่ราดซอส|0"> ไม่ราดซอส<br>
 
 <br>
 <button onclick="sendOrder()">ยืนยันสั่งเครป</button>
@@ -66,8 +93,6 @@ async function sendOrder() {
   let total = 0;
 
   let flourEl = document.querySelector('input[name="flour"]:checked');
-  let jamEl = document.querySelector('input[name="jam"]:checked');
-
   if (!flourEl) {
     alert("กรุณาเลือกแป้ง");
     return;
@@ -76,8 +101,12 @@ async function sendOrder() {
   let flour = parseItem(flourEl.value);
   total += flour.price;
 
-  let jam = jamEl ? parseItem(jamEl.value) : { name: "-", price: 0 };
-  total += jam.price;
+  let jams = [];
+  document.querySelectorAll('input[name="jam"]:checked').forEach(el => {
+    let item = parseItem(el.value);
+    jams.push(item.name);
+    total += item.price;
+  });
 
   let toppings = [];
   document.querySelectorAll('input[name="topping"]:checked').forEach(el => {
@@ -90,15 +119,14 @@ async function sendOrder() {
   document.querySelectorAll('input[name="sauce"]:checked').forEach(el => {
     let item = parseItem(el.value);
     sauces.push(item.name);
-    total += item.price;
   });
 
   let message =
 `🧾 สรุปรายการสั่งเครป
-🥞 แป้ง: ${flour.name} (${flour.price})
-🍫 แยม: ${jam.name} (${jam.price})
+🥞 แป้ง: ${flour.name}
+🍫 แยม: ${jams.join(", ") || "-"}
 🍌 ท็อปปิ้ง: ${toppings.join(", ") || "-"}
-🍯 ซอส: ${sauces.join(", ") || "-"}
+🧀 ซอส: ${sauces.join(", ") || "-"}
 
 💰 ราคารวม: ${total} บาท
 📌 ทางร้านจะยืนยันออเดอร์อีกครั้งครับ`;
