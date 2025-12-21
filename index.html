@@ -180,12 +180,34 @@ text += `
 `;
 }
 
-text += `\n💰 ราคารวมทั้งหมด: ${total} บาท\n📌 ทางร้านจะยืนยันออเดอร์อีกครั้งครับ`;
+text += `
+💰 ราคารวมทั้งหมด: ${total} บาท
 
-await liff.sendMessages([{type:"text", text}]);
+📌 กรุณาชำระเงินโดยสแกน QR ด้านล่าง
+หลังชำระแล้ว รอทางร้านยืนยันออเดอร์ครับ 🙏
+`;
+
+await liff.sendMessages([
+  // 1️⃣ ข้อความสรุปออเดอร์
+  {
+    type: "text",
+    text: text
+  },
+
+  // 2️⃣ รูป QR Payment
+  {
+    type: "image",
+    originalContentUrl:
+      "https://raw.githubusercontent.com/natchayonsit-cloud/crepe-order/main/1766328773945.png",
+    previewImageUrl:
+      "https://raw.githubusercontent.com/natchayonsit-cloud/crepe-order/main/1766328773945.png"
+  }
+]);
+
 liff.closeWindow();
 }
 </script>
 
 </body>
 </html>
+
