@@ -6,7 +6,6 @@
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 
 <style>
-/* ===== BASE ===== */
 body{
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
   padding:20px;
@@ -14,8 +13,6 @@ body{
   font-size:26px;
   line-height:1.9;
 }
-
-/* ===== CARD ===== */
 .sheet{
   background:#fff;
   padding:26px;
@@ -29,15 +26,11 @@ h2{font-size:40px;margin:0 0 20px}
   font-weight:bold;
   margin:30px 0 18px;
 }
-
-/* ===== GRID ===== */
 .grid-2{
   display:grid;
   grid-template-columns:1fr 1fr;
   gap:22px;
 }
-
-/* ===== OPTION ===== */
 .option{
   border:2px solid #e0e0e0;
   border-radius:22px;
@@ -61,22 +54,18 @@ h2{font-size:40px;margin:0 0 20px}
   padding:18px 20px 22px;
   box-shadow:0 -6px 16px rgba(0,0,0,.2);
   z-index:999;
-  transition:transform .25s ease, padding .25s ease;
+  transition:.25s;
 }
-
-/* โหมดย่อ */
 .sticky-bar.compact{
   transform:translateY(70%);
   padding:8px 16px;
 }
-
 .total-box{
   font-size:34px;
   font-weight:bold;
   text-align:center;
   margin-bottom:14px;
 }
-
 button{
   width:100%;
   padding:26px;
@@ -120,7 +109,6 @@ button{
 
 <div id="sheets"></div>
 
-<!-- STICKY BAR -->
 <div class="sticky-bar" id="stickyBar">
   <div class="total-box">💰 ยอดรวม: <span id="total">0</span> บาท</div>
   <button class="btn-add" onclick="addSheet()">➕ เพิ่มแผ่น</button>
@@ -128,7 +116,6 @@ button{
   <button class="btn-submit" onclick="sendOrder()">🧾 สรุป & ชำระเงิน</button>
 </div>
 
-<!-- POPUP -->
 <div class="popup-bg" id="popup">
   <div class="popup">
     <h3>ℹ️ แจ้งเตือน</h3>
@@ -188,10 +175,13 @@ function addSheet(){
   adjustSafeArea();
 }
 
-/* ===== RANDOM SMART ===== */
+/* ===== RANDOM MENU ===== */
 function randomMenu(){
   const i=sheetCount;
-  const flour=["แป้งกรอบ|20","แป้งนิ่ม|20"];
+
+  // 🔒 บังคับแป้งกรอบ 100%
+  const flour = "แป้งกรอบ|20";
+
   const jams=[
     "ช็อกโกแลต|0","สตรอว์เบอร์รี|0","วนิลา|0","ใบเตย|0",
     "ส้ม|0","ชาไทย|0","บลูเบอร์รี|0","พริกเผา|0","นูเทลล่า|15"
@@ -207,17 +197,16 @@ function randomMenu(){
 
   let tries=0;
   while(tries<100){
-    const f=pick(flour);
     const j=pick(jams);
     const s=pick(sauces);
     const topCount=Math.floor(Math.random()*5)+1;
     const tops=shuffle([...toppings]).slice(0,topCount);
-    const key=f+j+tops.join()+s;
+    const key=flour+j+tops.join()+s;
     if(!usedRandom.has(key)){
       usedRandom.add(key);
-      applyRandom(i,f,j,tops,s);
+      applyRandom(i,flour,j,tops,s);
       calcTotal();
-      showPopup("🎲 สุ่มเมนูให้อร่อยแล้ว!");
+      showPopup("🎲 สุ่มเมนูให้อร่อยแล้ว (แป้งกรอบ)");
       return;
     }
     tries++;
@@ -277,24 +266,49 @@ return `
 `;
 }
 
+/* ✅ แก้ตรงนี้: แยมโชว์ราคาเหมือนท็อปปิ้ง */
 function jamList(i){
 const jams=[
-["ช็อกโกแลต",0],["สตรอว์เบอร์รี",0],["วนิลา",0],["ใบเตย",0],
-["ส้ม",0],["ชาไทย",0],["บลูเบอร์รี",0],["พริกเผา",0],["นูเทลล่า",15]
+["ช็อกโกแลต",0],
+["สตรอว์เบอร์รี",0],
+["วนิลา",0],
+["ใบเตย",0],
+["ส้ม",0],
+["ชาไทย",0],
+["บลูเบอร์รี",0],
+["พริกเผา",0],
+["นูเทลล่า",15]
 ];
-return jams.map(j=>`<label class="option"><input type="checkbox" name="jam${i}" value="${j[0]}|${j[1]}">${j[0]}</label>`).join("");
+return jams.map(j=>
+`<label class="option">
+  <input type="checkbox" name="jam${i}" value="${j[0]}|${j[1]}">
+  ${j[0]} ${j[1]>0?`(+${j[1]})`:""}
+</label>`
+).join("");
 }
+
 function toppingList(i){
 const t=[
 ["กล้วย",5],["ลูกเกด",5],["คอนเฟลก",5],["โกโก้ครั้นช์",5],["โอริโอ้บด",5],
 ["ฝอยทอง",10],["เม็ดมะม่วง",10],["เยลลี่แดง",10],["มาร์ชเมลโล",10],
 ["หมูหยอง",10],["ไส้กรอก",10],["ปูอัด",10],["ชีส",10],["ไข่",10],["แฮม",10]
 ];
-return t.map(x=>`<label class="option"><input type="checkbox" name="topping${i}" value="${x[0]}|${x[1]}">${x[0]} (+${x[1]})</label>`).join("");
+return t.map(x=>
+`<label class="option">
+  <input type="checkbox" name="topping${i}" value="${x[0]}|${x[1]}">
+  ${x[0]} (+${x[1]})
+</label>`
+).join("");
 }
+
 function sauceList(i){
 const s=["นมข้น","ช็อกโกแลต","ซอสพริก","มายองเนส","ซอสมะเขือเทศ","ไม่ราดซอส"];
-return s.map(x=>`<label class="option"><input type="checkbox" name="sauce${i}" value="${x}|0">${x}</label>`).join("");
+return s.map(x=>
+`<label class="option">
+  <input type="checkbox" name="sauce${i}" value="${x}|0">
+  ${x}
+</label>`
+).join("");
 }
 
 /* ===== SEND ORDER ===== */
