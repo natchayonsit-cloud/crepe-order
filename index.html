@@ -12,11 +12,7 @@ body {
   padding: 16px;
   background: #f7f7f7;
 }
-
-h2 {
-  margin: 16px 0 8px;
-}
-
+h2 { margin: 16px 0 8px; }
 .sheet {
   background: #fff;
   padding: 12px;
@@ -24,24 +20,17 @@ h2 {
   margin-bottom: 16px;
   box-shadow: 0 1px 4px rgba(0,0,0,0.1);
 }
-
 .grid-2 {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 8px 12px;
 }
-
 .option {
   border: 1px solid #ddd;
   border-radius: 8px;
   padding: 8px;
   font-size: 14px;
 }
-
-.option input {
-  margin-right: 6px;
-}
-
 button {
   padding: 14px;
   font-size: 16px;
@@ -50,15 +39,9 @@ button {
   border: none;
   margin-top: 10px;
 }
-
-.btn-add {
-  background: #ddd;
-}
-
-.btn-submit {
-  background: #06c755;
-  color: #fff;
-}
+.btn-add { background: #ddd; }
+.btn-remove { background: #ffdddd; }
+.btn-submit { background: #06c755; color: #fff; }
 </style>
 </head>
 
@@ -67,10 +50,13 @@ button {
 <div id="sheets"></div>
 
 <button class="btn-add" onclick="addSheet()">➕ เพิ่มแผ่น</button>
+<button class="btn-remove" onclick="removeSheet()">➖ ลบแผ่นล่าสุด</button>
 <button class="btn-submit" onclick="sendOrder()">🧾 สรุป & ชำระเงิน</button>
 
 <script>
 const LIFF_ID = "2008739884-92cBWC4G";
+const QR_URL = "https://raw.githubusercontent.com/natchayonsit-cloud/crepe-order/main/1766328773945.png";
+
 let sheetCount = 0;
 
 window.onload = async () => {
@@ -86,6 +72,15 @@ function addSheet() {
   document.getElementById("sheets").appendChild(div);
 }
 
+function removeSheet() {
+  if (sheetCount <= 1) {
+    alert("ต้องมีอย่างน้อย 1 แผ่น");
+    return;
+  }
+  document.getElementById("sheets").lastElementChild.remove();
+  sheetCount--;
+}
+
 function getSheetHTML(i) {
 return `
 <h2>🥞 แผ่นที่ ${i}</h2>
@@ -97,27 +92,20 @@ return `
 </div>
 
 <b>🍫 แยม (เลือกได้ 1–2)</b>
-<div class="grid-2">
-${jamList(i)}
-</div>
+<div class="grid-2">${jamList(i)}</div>
 
 <b>🍌 ท็อปปิ้ง (เลือกได้ 1–5)</b>
-<div class="grid-2">
-${toppingList(i)}
-</div>
+<div class="grid-2">${toppingList(i)}</div>
 
 <b>🧀 ซอส (เลือกได้ 1–3)</b>
-<div class="grid-2">
-${sauceList(i)}
-</div>
+<div class="grid-2">${sauceList(i)}</div>
 `;
 }
 
 function jamList(i) {
 const jams = [
 ["ช็อกโกแลต",0],["สตรอว์เบอร์รี",0],["วนิลา",0],["ใบเตย",0],
-["ส้ม",0],["ชาไทย",0],["บลูเบอร์รี",0],["พริกเผา",0],
-["นูเทลล่า",15]
+["ส้ม",0],["ชาไทย",0],["บลูเบอร์รี",0],["พริกเผา",0],["นูเทลล่า",15]
 ];
 return jams.map(j =>
 `<label class="option"><input type="checkbox" name="jam${i}" value="${j[0]}|${j[1]}">${j[0]} ${j[1]?`(+${j[1]})`:""}</label>`
@@ -147,6 +135,15 @@ const [n,p] = v.split("|");
 return {name:n, price:+p};
 }
 
+function checkLimit(name, max, label) {
+const c = document.querySelectorAll(`input[name="${name}"]:checked`).length;
+if (c > max) {
+  alert(`${label} เลือกได้ไม่เกิน ${max} อย่าง`);
+  return false;
+}
+return true;
+}
+
 async function sendOrder() {
 if (!liff.isInClient()) return alert("กรุณาเปิดผ่าน LINE");
 
@@ -154,24 +151,30 @@ let total = 0;
 let text = "🧾 สรุปรายการสั่งเครป\n";
 
 for (let i=1;i<=sheetCount;i++) {
-let flour = document.querySelector(`input[name="flour${i}"]:checked`);
-if (!flour) return alert(`กรุณาเลือกแป้ง แผ่นที่ ${i}`);
+  if (
+    !checkLimit(`jam${i}`,2,"แยม (แผ่นที่ "+i+")") ||
+    !checkLimit(`topping${i}`,5,"ท็อปปิ้ง (แผ่นที่ "+i+")") ||
+    !checkLimit(`sauce${i}`,3,"ซอส (แผ่นที่ "+i+")")
+  ) return;
 
-let f = parseItem(flour.value);
-total += f.price;
+  let flour = document.querySelector(`input[name="flour${i}"]:checked`);
+  if (!flour) return alert(`กรุณาเลือกแป้ง แผ่นที่ ${i}`);
 
-let jams=[], tops=[], sauces=[];
-document.querySelectorAll(`input[name="jam${i}"]:checked`).forEach(e=>{
-let x=parseItem(e.value); jams.push(x.name); total+=x.price;
-});
-document.querySelectorAll(`input[name="topping${i}"]:checked`).forEach(e=>{
-let x=parseItem(e.value); tops.push(x.name); total+=x.price;
-});
-document.querySelectorAll(`input[name="sauce${i}"]:checked`).forEach(e=>{
-sauces.push(e.value.split("|")[0]);
-});
+  let f = parseItem(flour.value);
+  total += f.price;
 
-text += `
+  let jams=[], tops=[], sauces=[];
+  document.querySelectorAll(`input[name="jam${i}"]:checked`).forEach(e=>{
+    let x=parseItem(e.value); jams.push(x.name); total+=x.price;
+  });
+  document.querySelectorAll(`input[name="topping${i}"]:checked`).forEach(e=>{
+    let x=parseItem(e.value); tops.push(x.name); total+=x.price;
+  });
+  document.querySelectorAll(`input[name="sauce${i}"]:checked`).forEach(e=>{
+    sauces.push(e.value.split("|")[0]);
+  });
+
+  text += `
 🍽 แผ่นที่ ${i}
 🥞 แป้ง: ${f.name}
 🍫 แยม: ${jams.join(", ")||"-"}
@@ -188,19 +191,11 @@ text += `
 `;
 
 await liff.sendMessages([
-  // 1️⃣ ข้อความสรุปออเดอร์
-  {
-    type: "text",
-    text: text
-  },
-
-  // 2️⃣ รูป QR Payment
+  { type: "text", text },
   {
     type: "image",
-    originalContentUrl:
-      "https://raw.githubusercontent.com/natchayonsit-cloud/crepe-order/main/1766328773945.png",
-    previewImageUrl:
-      "https://raw.githubusercontent.com/natchayonsit-cloud/crepe-order/main/1766328773945.png"
+    originalContentUrl: QR_URL,
+    previewImageUrl: QR_URL
   }
 ]);
 
@@ -210,4 +205,3 @@ liff.closeWindow();
 
 </body>
 </html>
-
