@@ -3,30 +3,35 @@
 <head>
 <meta charset="UTF-8">
 <title>สั่งเครป</title>
-
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 
 <style>
 body { font-family: sans-serif; padding: 16px; }
-h2, h3 { margin-top: 16px; }
 .sheet {
-  border: 2px solid #ddd;
-  border-radius: 10px;
-  padding: 12px;
-  margin-bottom: 20px;
+  border:2px solid #ddd;
+  border-radius:10px;
+  padding:12px;
+  margin-bottom:16px;
 }
+h2,h3 { margin:8px 0; }
 button {
-  padding: 12px;
-  font-size: 16px;
-  width: 100%;
-  background: #06c755;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  margin-top: 10px;
+  width:100%;
+  padding:14px;
+  font-size:16px;
+  border:none;
+  border-radius:8px;
+  background:#06c755;
+  color:#fff;
+  margin-top:10px;
 }
-.btn-gray {
-  background:#999;
+.btn-gray { background:#999; }
+#qrBox {
+  display:none;
+  text-align:center;
+  margin-top:20px;
+}
+#qrBox img {
+  max-width:260px;
 }
 small { color:#666; }
 </style>
@@ -39,114 +44,106 @@ small { color:#666; }
 <div id="sheets"></div>
 
 <button onclick="addSheet()">➕ เพิ่มแผ่น</button>
-<button class="btn-gray" onclick="removeSheet()">➖ ลบแผ่นล่าสุด</button>
-<button onclick="sendOrder()">ยืนยันสั่งเครป</button>
+<button class="btn-gray" onclick="removeSheet()">➖ ลบแผ่น</button>
+<button onclick="previewOrder()">💳 สรุป & ชำระเงิน</button>
+
+<div id="qrBox">
+  <h2>📌 กรุณาชำระเงิน</h2>
+  <p id="totalText"></p>
+  <img src="https://i.imgur.com/XXXXXXX.jpg" alt="PromptPay QR">
+  <!-- ⬆️ ใส่ URL รูป QR ของคุณตรงนี้ -->
+  <button onclick="sendOrder()">✅ ยืนยันออเดอร์</button>
+</div>
 
 <script>
 const LIFF_ID = "2008739884-92cBWC4G";
 const MAX_SHEET = 4;
 let sheetCount = 0;
+let finalMessage = "";
+let finalTotal = 0;
 
 window.onload = async () => {
   await liff.init({ liffId: LIFF_ID });
-  addSheet(); // เริ่มต้นแผ่นที่ 1
+  addSheet();
 };
 
-// ---------- เมนูกลาง ----------
-const flourList = [
-  ["แป้งกรอบ",20],
-  ["แป้งนิ่ม",20]
+const flour = [["แป้งกรอบ",20],["แป้งนิ่ม",20]];
+const jam = [["ช็อกโกแลต",0],["สตรอว์เบอร์รี",0],["วนิลา",0],["ใบเตย",0],
+["ส้ม",0],["ชาไทย",0],["บลูเบอร์รี",0],["พริกเผา",0],["นูเทลล่า",15]];
+const topping = [
+["กล้วย",5],["คอนเฟลก",5],["โกโก้ครั้นช์",5],["โอริโอ้บด",5],["ลูกเกด",5],
+["ฝอยทอง",10],["เม็ดมะม่วง",10],["เยลลี่แดง",10],["มาร์ชเมลโล",10],
+["หมูหยอง",10],["ไส้กรอก",10],["ปูอัด",10],["ชีส",10],["ไข่",10],["แฮม",10]
 ];
+const sauce = [["นมข้น",0],["ช็อกโกแลต",0],["ซอสพริก",0],
+["มายองเนส",0],["ซอสมะเขือเทศ",0],["ไม่ราดซอส",0]];
 
-const jamList = [
-  ["ช็อกโกแลต",0],["สตรอว์เบอร์รี",0],["วนิลา",0],["ใบเตย",0],
-  ["ส้ม",0],["ชาไทย",0],["บลูเบอร์รี",0],["พริกเผา",0],
-  ["นูเทลล่า",15]
-];
-
-const toppingList = [
-  ["กล้วย",5],["คอนเฟลก",5],["โกโก้ครั้นช์",5],["โอริโอ้บด",5],["ลูกเกด",5],
-  ["ฝอยทอง",10],["เม็ดมะม่วง",10],["เยลลี่แดง",10],["มาร์ชเมลโล",10],
-  ["หมูหยอง",10],["ไส้กรอก",10],["ปูอัด",10],["ชีส",10],["ไข่",10],["แฮม",10]
-];
-
-const sauceList = [
-  ["นมข้น",0],["ช็อกโกแลต",0],["ซอสพริก",0],
-  ["มายองเนส",0],["ซอสมะเขือเทศ",0],["ไม่ราดซอส",0]
-];
-
-// ---------- UI ----------
-function addSheet() {
-  if (sheetCount >= MAX_SHEET) return alert("ได้สูงสุด 4 แผ่น");
+function addSheet(){
+  if(sheetCount>=MAX_SHEET) return alert("สูงสุด 4 แผ่น");
   sheetCount++;
-  renderSheet(sheetCount);
+  let n=sheetCount;
+  let html=`<div class="sheet" id="sheet${n}">
+  <h2>📄 แผ่นที่ ${n}</h2>
+
+  <h3>🥞 แป้ง</h3>
+  ${flour.map(f=>`<input type="radio" name="flour${n}" value="${f[0]}|${f[1]}"> ${f[0]} (${f[1]})<br>`).join("")}
+
+  <h3>🍫 แยม <small>(≤2)</small></h3>
+  ${jam.map(j=>`<input type="checkbox" name="jam${n}" value="${j[0]}|${j[1]}"> ${j[0]} ${j[1]?`(+${j[1]})`:""}<br>`).join("")}
+
+  <h3>🍌 ท็อปปิ้ง <small>(≤5)</small></h3>
+  ${topping.map(t=>`<input type="checkbox" name="top${n}" value="${t[0]}|${t[1]}"> ${t[0]} (+${t[1]})<br>`).join("")}
+
+  <h3>🧀 ซอส <small>(≤3)</small></h3>
+  ${sauce.map(s=>`<input type="checkbox" name="sauce${n}" value="${s[0]}|${s[1]}"> ${s[0]}<br>`).join("")}
+  </div>`;
+  sheets.insertAdjacentHTML("beforeend",html);
 }
 
-function removeSheet() {
-  if (sheetCount <= 1) return;
+function removeSheet(){
+  if(sheetCount<=1) return;
   document.getElementById(`sheet${sheetCount}`).remove();
   sheetCount--;
 }
 
-function renderSheet(n) {
-  let html = `
-  <div class="sheet" id="sheet${n}">
-    <h2>📄 แผ่นที่ ${n}</h2>
+function parse(v){let[a,b]=v.split("|");return{name:a,price:+b};}
+function checked(n){return document.querySelectorAll(`input[name="${n}"]:checked`);}
 
-    <h3>🥞 แป้ง (เลือก 1)</h3>
-    ${flourList.map(f=>`<label><input type="radio" name="flour${n}" value="${f[0]}|${f[1]}"> ${f[0]} (${f[1]})</label><br>`).join("")}
+function previewOrder(){
+  let msg="🧾 สรุปรายการสั่งเครป\n\n";
+  let grand=0;
 
-    <h3>🍫 แยม <small>(ไม่เกิน 2)</small></h3>
-    ${jamList.map(j=>`<label><input type="checkbox" name="jam${n}" value="${j[0]}|${j[1]}"> ${j[0]}${j[1]?` (+${j[1]})`:""}</label><br>`).join("")}
+  for(let i=1;i<=sheetCount;i++){
+    let f=document.querySelector(`input[name="flour${i}"]:checked`);
+    if(!f) return alert(`เลือกแป้ง แผ่นที่ ${i}`);
 
-    <h3>🍌 ท็อปปิ้ง <small>(ไม่เกิน 5)</small></h3>
-    ${toppingList.map(t=>`<label><input type="checkbox" name="topping${n}" value="${t[0]}|${t[1]}"> ${t[0]} (+${t[1]})</label><br>`).join("")}
+    if(checked(`jam${i}`).length>2) return alert(`แยมเกิน 2 (แผ่น ${i})`);
+    if(checked(`top${i}`).length>5) return alert(`ท็อปปิ้งเกิน 5 (แผ่น ${i})`);
+    if(checked(`sauce${i}`).length>3) return alert(`ซอสเกิน 3 (แผ่น ${i})`);
 
-    <h3>🧀 ซอส <small>(ไม่เกิน 3)</small></h3>
-    ${sauceList.map(s=>`<label><input type="checkbox" name="sauce${n}" value="${s[0]}|${s[1]}"> ${s[0]}</label><br>`).join("")}
-  </div>`;
-  document.getElementById("sheets").insertAdjacentHTML("beforeend", html);
-}
+    let sum=0;
+    let F=parse(f.value); sum+=F.price;
 
-// ---------- Logic ----------
-function parse(v){ let [n,p]=v.split("|"); return {n, p:+p}; }
-function checked(name){ return document.querySelectorAll(`input[name="${name}"]:checked`); }
+    let J=[],T=[],S=[];
+    checked(`jam${i}`).forEach(e=>{let x=parse(e.value);J.push(x.name);sum+=x.price;});
+    checked(`top${i}`).forEach(e=>{let x=parse(e.value);T.push(x.name);sum+=x.price;});
+    checked(`sauce${i}`).forEach(e=>S.push(parse(e.value).name));
 
-async function sendOrder() {
-  if (!liff.isInClient()) return alert("เปิดผ่าน LINE เท่านั้น");
+    grand+=sum;
 
-  let msg = "🧾 สรุปรายการสั่งเครป\n\n";
-  let grandTotal = 0;
-
-  for (let i=1;i<=sheetCount;i++) {
-    let flour = document.querySelector(`input[name="flour${i}"]:checked`);
-    if (!flour) return alert(`กรุณาเลือกแป้ง แผ่นที่ ${i}`);
-
-    if (checked(`jam${i}`).length>2) return alert(`แยม แผ่นที่ ${i} เกิน 2`);
-    if (checked(`topping${i}`).length>5) return alert(`ท็อปปิ้ง แผ่นที่ ${i} เกิน 5`);
-    if (checked(`sauce${i}`).length>3) return alert(`ซอส แผ่นที่ ${i} เกิน 3`);
-
-    let total=0;
-    let f=parse(flour.value); total+=f.p;
-
-    let jams=[], tops=[], sauces=[];
-    checked(`jam${i}`).forEach(e=>{let x=parse(e.value); jams.push(x.n); total+=x.p;});
-    checked(`topping${i}`).forEach(e=>{let x=parse(e.value); tops.push(x.n); total+=x.p;});
-    checked(`sauce${i}`).forEach(e=>{sauces.push(parse(e.value).n);});
-
-    grandTotal+=total;
-
-    msg+=`📄 แผ่นที่ ${i}\n`;
-    msg+=`🥞 แป้ง: ${f.n}\n`;
-    msg+=`🍫 แยม: ${jams.join(", ")||"-"}\n`;
-    msg+=`🍌 ท็อปปิ้ง: ${tops.join(", ")||"-"}\n`;
-    msg+=`🧀 ซอส: ${sauces.join(", ")||"-"}\n`;
-    msg+=`💰 รวม: ${total} บาท\n\n`;
+    msg+=`📄 แผ่นที่ ${i}\n🥞 ${F.name}\n🍫 ${J.join(",")||"-"}\n🍌 ${T.join(",")||"-"}\n🧀 ${S.join(",")||"-"}\n💰 ${sum} บาท\n\n`;
   }
 
-  msg+=`💳 รวมทั้งหมด ${grandTotal} บาท\n📌 ทางร้านจะยืนยันออเดอร์อีกครั้งครับ`;
+  msg+=`💳 รวมทั้งหมด ${grand} บาท`;
+  finalMessage=msg;
+  finalTotal=grand;
 
-  await liff.sendMessages([{type:"text", text:msg}]);
+  document.getElementById("totalText").innerText=`ยอดที่ต้องชำระ ${grand} บาท`;
+  document.getElementById("qrBox").style.display="block";
+}
+
+async function sendOrder(){
+  await liff.sendMessages([{type:"text",text:finalMessage+"\n📌 ชำระแล้ว กรุณารอร้านยืนยันครับ"}]);
   liff.closeWindow();
 }
 </script>
