@@ -3,11 +3,22 @@
 <head>
 <meta charset="UTF-8">
 <title>สั่งเครป</title>
+
+<!-- LIFF SDK -->
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+
 <style>
 body { font-family: sans-serif; padding: 16px; }
 h2 { margin-top: 24px; }
-button { padding: 12px; font-size: 16px; width: 100%; background: #06c755; color: #fff; border: none; border-radius: 8px; }
+button {
+  padding: 14px;
+  font-size: 18px;
+  width: 100%;
+  background: #06c755;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+}
 </style>
 </head>
 
@@ -23,39 +34,47 @@ button { padding: 12px; font-size: 16px; width: 100%; background: #06c755; color
 <input type="radio" name="jam" value="สตรอว์เบอร์รี"> สตรอว์เบอร์รี<br>
 
 <h2>🍌 ท็อปปิ้ง</h2>
-<input type="checkbox" value="กล้วย"> กล้วย<br>
-<input type="checkbox" value="ชีส"> ชีส<br>
-<input type="checkbox" value="ไข่"> ไข่<br>
+<input type="checkbox" name="topping" value="กล้วย"> กล้วย<br>
+<input type="checkbox" name="topping" value="ชีส"> ชีส<br>
+<input type="checkbox" name="topping" value="ไข่"> ไข่<br>
 
 <h2>🍯 ซอส</h2>
-<input type="checkbox" value="นมข้น"> นมข้น<br>
-<input type="checkbox" value="ช็อกโกแลต"> ช็อกโกแลต<br>
+<input type="checkbox" name="sauce" value="นมข้น"> นมข้น<br>
+<input type="checkbox" name="sauce" value="ช็อกโกแลต"> ช็อกโกแลต<br>
 
 <br>
+<!-- ✅ STEP 3 อยู่ตรงนี้ -->
 <button onclick="sendOrder()">ยืนยันสั่งเครป</button>
 
 <script>
 async function sendOrder() {
   await liff.init({ liffId: "2008739884-Ml1lkrcK" });
 
-  let base = document.querySelector('input[name="base"]:checked');
-  let jam = document.querySelector('input[name="jam"]:checked');
-  let toppings = Array.from(document.querySelectorAll('input[type="checkbox"]:checked'))
-                      .map(el => el.value)
-                      .join(", ");
-
-  let message =
-`🧾 สรุปรายการสั่งเครป
-แป้ง: ${base ? base.value : "-"}
-แยม: ${jam ? jam.value : "-"}
-ท็อปปิ้ง: ${toppings || "-"}
-
-📌 รอร้านยืนยันราคา`;
-
-  if (liff.isInClient()) {
-    await liff.sendMessages([{ type: "text", text: message }]);
-    liff.closeWindow();
+  if (!liff.isInClient()) {
+    alert("กรุณาเปิดผ่าน LINE");
+    return;
   }
+
+  const base = document.querySelector('input[name="base"]:checked')?.value || "-";
+  const jam = document.querySelector('input[name="jam"]:checked')?.value || "-";
+
+  const toppings = [...document.querySelectorAll('input[name="topping"]:checked')]
+    .map(e => e.value).join(", ") || "-";
+
+  const sauces = [...document.querySelectorAll('input[name="sauce"]:checked')]
+    .map(e => e.value).join(", ") || "-";
+
+  const message =
+`🧾 สรุปรายการสั่งเครป
+🥞 แป้ง: ${base}
+🍫 แยม: ${jam}
+🍌 ท็อปปิ้ง: ${toppings}
+🍯 ซอส: ${sauces}
+
+📌 ร้านจะสรุปราคาให้อีกครั้งครับ`;
+
+  await liff.sendMessages([{ type: "text", text: message }]);
+  liff.closeWindow();
 }
 </script>
 
