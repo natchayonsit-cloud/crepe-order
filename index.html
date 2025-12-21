@@ -191,35 +191,8 @@ text += `
 `;
 
 await liff.sendMessages([
-  // 1️⃣ ข้อความสรุปออเดอร์
-  {
-    type: "text",
-    text: text
-  },
-
-  // 2️⃣ รูป QR Payment
-  {
-    type: "image",
-    originalContentUrl: QR_URL,
-    previewImageUrl: QR_URL
-  },
-
-  // 3️⃣ ปุ่มยืนยันการชำระเงิน
-  {
-    type: "template",
-    altText: "ยืนยันการชำระเงิน",
-    template: {
-      type: "buttons",
-      text: "หลังจากชำระเงินแล้ว กรุณากดยืนยันด้านล่าง",
-      actions: [
-        {
-          type: "message",
-          label: "✅ ฉันชำระแล้ว",
-          text: "📌 ลูกค้ากดยืนยันว่า *ชำระเงินแล้ว*"
-        }
-      ]
-    }
-  }
+  { type: "text", text },
+  { type: "image", originalContentUrl: QR_URL, previewImageUrl: QR_URL }
 ]);
 
 liff.closeWindow();
@@ -228,4 +201,5 @@ liff.closeWindow();
 
 </body>
 </html>
+
 
