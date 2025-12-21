@@ -6,11 +6,10 @@
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 
 <style>
-/* ===== BASE BIG UI ===== */
 body{
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
   padding:20px;
-  padding-bottom:220px;
+  padding-bottom:260px;
   background:#f2f3f5;
   font-size:26px;
   line-height:1.9;
@@ -28,15 +27,11 @@ h2{font-size:40px;margin:0 0 20px}
   font-weight:bold;
   margin:30px 0 18px;
 }
-
-/* ===== GRID ===== */
 .grid-2{
   display:grid;
   grid-template-columns:1fr 1fr;
   gap:22px;
 }
-
-/* ===== OPTION ===== */
 .option{
   border:2px solid #e0e0e0;
   border-radius:22px;
@@ -50,23 +45,6 @@ h2{font-size:40px;margin:0 0 20px}
 .option input{
   transform:scale(2.2);
   accent-color:#06c755;
-}
-
-/* ===== BUTTONS ===== */
-button{
-  width:100%;
-  padding:26px;
-  font-size:30px;
-  border-radius:26px;
-  border:none;
-}
-
-/* ปุ่มเพิ่มแผ่น (เด่นมาก) */
-.btn-add{
-  background:#2563eb;
-  color:#fff;
-  font-weight:bold;
-  margin-top:20px;
 }
 
 /* ===== STICKY BAR ===== */
@@ -84,22 +62,21 @@ button{
   text-align:center;
   margin-bottom:14px;
 }
-.btn-submit{
-  background:#06c755;
-  color:#fff;
-  font-weight:bold;
-}
-.btn-random{
-  background:#f59e0b;
-  color:#fff;
-  font-weight:bold;
+button{
+  width:100%;
+  padding:26px;
+  font-size:30px;
+  border-radius:26px;
+  border:none;
   margin-bottom:12px;
 }
+.btn-add{background:#2563eb;color:#fff;font-weight:bold}
+.btn-random{background:#f59e0b;color:#fff;font-weight:bold}
+.btn-submit{background:#06c755;color:#fff;font-weight:bold}
 
 /* ===== POPUP ===== */
 .popup-bg{
-  position:fixed;
-  inset:0;
+  position:fixed;inset:0;
   background:rgba(0,0,0,.6);
   display:none;
   align-items:center;
@@ -128,11 +105,10 @@ button{
 
 <div id="sheets"></div>
 
-<button class="btn-add" onclick="addSheet()">➕ เพิ่มแผ่นเครป</button>
-
 <!-- STICKY -->
 <div class="sticky-bar">
   <div class="total-box">💰 ยอดรวม: <span id="total">0</span> บาท</div>
+  <button class="btn-add" onclick="addSheet()">➕ เพิ่มแผ่น</button>
   <button class="btn-random" onclick="randomMenu()">🎲 เมนูสุ่ม</button>
   <button class="btn-submit" onclick="sendOrder()">🧾 สรุป & ชำระเงิน</button>
 </div>
@@ -151,7 +127,7 @@ const LIFF_ID="2008739884-92cBWC4G";
 const QR_URL="https://raw.githubusercontent.com/natchayonsit-cloud/crepe-order/main/1766328773945.png";
 
 let sheetCount=0;
-let usedRandom = new Set(); // เก็บสูตรที่สุ่มไปแล้ว
+let usedRandom=new Set();
 
 window.onload=async()=>{
   await liff.init({liffId:LIFF_ID});
@@ -159,14 +135,12 @@ window.onload=async()=>{
   document.body.addEventListener("change",calcTotal);
 };
 
-/* ===== POPUP ===== */
 function showPopup(msg){
   popupText.textContent=msg;
   popup.style.display="flex";
 }
 function closePopup(){ popup.style.display="none"; }
 
-/* ===== SHEET ===== */
 function addSheet(){
   sheetCount++;
   const d=document.createElement("div");
@@ -175,55 +149,65 @@ function addSheet(){
   sheets.appendChild(d);
 }
 
-/* ===== RANDOM MENU ===== */
+/* ===== RANDOM SMART ===== */
 function randomMenu(){
-  const i = sheetCount;
+  const i=sheetCount;
 
-  const flours = ["แป้งกรอบ|20","แป้งนิ่ม|20"];
-  const jams = [
+  const flour=["แป้งกรอบ|20","แป้งนิ่ม|20"];
+  const jams=[
     "ช็อกโกแลต|0","สตรอว์เบอร์รี|0","วนิลา|0","ใบเตย|0",
     "ส้ม|0","ชาไทย|0","บลูเบอร์รี|0","พริกเผา|0","นูเทลล่า|15"
   ];
-  const toppings = [
+  const toppings=[
     "กล้วย|5","ลูกเกด|5","คอนเฟลก|5","โกโก้ครั้นช์|5","โอริโอ้บด|5",
     "ฝอยทอง|10","เม็ดมะม่วง|10","เยลลี่แดง|10","มาร์ชเมลโล|10",
     "หมูหยอง|10","ไส้กรอก|10","ปูอัด|10","ชีส|10","ไข่|10","แฮม|10"
   ];
-  const sauces = ["นมข้น|0","ช็อกโกแลต|0","ซอสพริก|0","มายองเนส|0","ซอสมะเขือเทศ|0","ไม่ราดซอส|0"];
+  const sauces=[
+    "นมข้น|0","ช็อกโกแลต|0","ซอสพริก|0","มายองเนส|0","ซอสมะเขือเทศ|0","ไม่ราดซอส|0"
+  ];
 
-  let key;
-  let tries = 0;
-  do {
-    const f = flours[Math.floor(Math.random()*flours.length)];
-    const j = jams[Math.floor(Math.random()*jams.length)];
-    const t = toppings[Math.floor(Math.random()*toppings.length)];
-    const s = sauces[Math.floor(Math.random()*sauces.length)];
-    key = f+j+t+s;
-    if (!usedRandom.has(key)) {
+  let key,tries=0;
+  do{
+    const f=pick(flour);
+    const j=pick(jams);
+    const s=pick(sauces);
+    const count=Math.floor(Math.random()*5)+1; // 1–5 ท็อป
+    const tops=shuffle([...toppings]).slice(0,count);
+
+    key=f+j+tops.join()+s;
+    if(!usedRandom.has(key)){
       usedRandom.add(key);
-      selectRandom(i,f,j,t,s);
+      applyRandom(i,f,j,tops,s);
       calcTotal();
-      showPopup("🎲 สุ่มเมนูใหม่ให้แล้ว!");
+      showPopup("🎲 สุ่มเมนูให้อร่อยแล้ว!");
       return;
     }
     tries++;
-  } while (tries < 100);
+  }while(tries<100);
 
   usedRandom.clear();
-  showPopup("สุ่มครบทุกสูตรแล้ว เริ่มสุ่มใหม่อีกครั้ง 🎉");
+  showPopup("สุ่มครบทุกสูตรแล้ว เริ่มสุ่มใหม่ได้อีก 🎉");
 }
 
-function selectRandom(i,f,j,t,s){
+function applyRandom(i,f,j,tops,s){
+  document.querySelectorAll(`input[name="flour${i}"]`).forEach(x=>x.checked=false);
   document.querySelector(`input[name="flour${i}"][value="${f}"]`).checked=true;
+
   document.querySelectorAll(`input[name="jam${i}"]`).forEach(x=>x.checked=false);
   document.querySelector(`input[name="jam${i}"][value="${j}"]`).checked=true;
 
   document.querySelectorAll(`input[name="topping${i}"]`).forEach(x=>x.checked=false);
-  document.querySelector(`input[name="topping${i}"][value="${t}"]`).checked=true;
+  tops.forEach(t=>{
+    document.querySelector(`input[name="topping${i}"][value="${t}"]`).checked=true;
+  });
 
   document.querySelectorAll(`input[name="sauce${i}"]`).forEach(x=>x.checked=false);
   document.querySelector(`input[name="sauce${i}"][value="${s}"]`).checked=true;
 }
+
+function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+function shuffle(a){ return a.sort(()=>Math.random()-0.5); }
 
 /* ===== TOTAL ===== */
 function calcTotal(){
@@ -235,7 +219,7 @@ function calcTotal(){
   total.textContent=t;
 }
 
-/* ===== DATA (ครบถ้วน) ===== */
+/* ===== DATA ===== */
 function getSheetHTML(i){
 return `
 <h2>🥞 แผ่นที่ ${i}</h2>
@@ -262,9 +246,7 @@ const jams=[
 ["ช็อกโกแลต",0],["สตรอว์เบอร์รี",0],["วนิลา",0],["ใบเตย",0],
 ["ส้ม",0],["ชาไทย",0],["บลูเบอร์รี",0],["พริกเผา",0],["นูเทลล่า",15]
 ];
-return jams.map(j=>
-`<label class="option"><input type="checkbox" name="jam${i}" value="${j[0]}|${j[1]}">${j[0]} ${j[1]?`(+${j[1]})`:""}</label>`
-).join("");
+return jams.map(j=>`<label class="option"><input type="checkbox" name="jam${i}" value="${j[0]}|${j[1]}">${j[0]}</label>`).join("");
 }
 function toppingList(i){
 const t=[
@@ -272,18 +254,14 @@ const t=[
 ["ฝอยทอง",10],["เม็ดมะม่วง",10],["เยลลี่แดง",10],["มาร์ชเมลโล",10],
 ["หมูหยอง",10],["ไส้กรอก",10],["ปูอัด",10],["ชีส",10],["ไข่",10],["แฮม",10]
 ];
-return t.map(x=>
-`<label class="option"><input type="checkbox" name="topping${i}" value="${x[0]}|${x[1]}">${x[0]} (+${x[1]})</label>`
-).join("");
+return t.map(x=>`<label class="option"><input type="checkbox" name="topping${i}" value="${x[0]}|${x[1]}">${x[0]} (+${x[1]})</label>`).join("");
 }
 function sauceList(i){
 const s=["นมข้น","ช็อกโกแลต","ซอสพริก","มายองเนส","ซอสมะเขือเทศ","ไม่ราดซอส"];
-return s.map(x=>
-`<label class="option"><input type="checkbox" name="sauce${i}" value="${x}|0">${x}</label>`
-).join("");
+return s.map(x=>`<label class="option"><input type="checkbox" name="sauce${i}" value="${x}|0">${x}</label>`).join("");
 }
 
-/* ===== SEND ORDER (เหมือนเดิม) ===== */
+/* ===== SEND ORDER ===== */
 async function sendOrder(){
   if(!liff.isInClient()){showPopup("กรุณาเปิดผ่าน LINE");return}
   await liff.sendMessages([
