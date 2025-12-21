@@ -10,65 +10,66 @@
 /* ================== BASE ================== */
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  padding: 16px;
+  padding: 18px;
   background: #f3f4f6;
-  font-size: 18px;
-  line-height: 1.6;
+  font-size: 22px;              /* 🔥 ใหญ่ขึ้นมาก */
+  line-height: 1.8;
 }
 
 /* ================== SHEET CARD ================== */
 .sheet {
   background: #ffffff;
-  padding: 20px;
-  border-radius: 18px;
-  margin-bottom: 22px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+  padding: 22px;
+  border-radius: 20px;
+  margin-bottom: 26px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
 /* ================== TITLES ================== */
 h2 {
-  margin: 0 0 12px;
-  font-size: 26px;
+  margin: 0 0 14px;
+  font-size: 32px;              /* 🔥 ใหญ่มาก */
 }
 
 .section-title {
-  font-size: 20px;
+  font-size: 26px;              /* 🔥 หัวข้อย่อยใหญ่ */
   font-weight: bold;
-  margin: 20px 0 12px;
+  margin: 26px 0 14px;
+}
+
+/* ================== GRID : 2 COLUMNS ================== */
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* ✅ 2 คอลัมน์ */
+  gap: 16px;
 }
 
 /* ================== OPTIONS ================== */
-.grid-2 {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 14px;
-}
-
 .option {
-  border: 1px solid #e0e0e0;
-  border-radius: 14px;
-  padding: 14px 14px;
-  font-size: 18px;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 18px;
+  padding: 18px 16px;
+  font-size: 22px;              /* 🔥 ใหญ่ */
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 16px;
   background: #fafafa;
 }
 
-/* checkbox / radio ใหญ่ */
+/* checkbox / radio ใหญ่มาก */
 .option input {
-  transform: scale(1.5);
+  transform: scale(1.8);        /* 🔥 กดง่ายสุด */
   accent-color: #06c755;
 }
 
 /* ================== BUTTONS ================== */
 button {
   width: 100%;
-  padding: 18px;
-  font-size: 20px;
-  border-radius: 16px;
+  padding: 22px;
+  font-size: 26px;
+  border-radius: 20px;
   border: none;
-  margin-top: 14px;
+  margin-top: 18px;
 }
 
 .btn-add {
@@ -83,12 +84,12 @@ button {
   background: #06c755;
   color: #fff;
   font-weight: bold;
-  font-size: 22px;
+  font-size: 30px;              /* 🔥 เด่นที่สุด */
 }
 
-/* เว้นพื้นที่ล่างกันนิ้วชน */
+/* เว้นพื้นที่ล่าง */
 .footer-space {
-  height: 30px;
+  height: 40px;
 }
 </style>
 </head>
