@@ -8,22 +8,27 @@
 
 <style>
 body { font-family: sans-serif; padding: 16px; }
-h2 { margin-top: 24px; }
+h2, h3 { margin-top: 16px; }
+.sheet {
+  border: 2px solid #ddd;
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 20px;
+}
 button {
-  padding: 14px;
+  padding: 12px;
   font-size: 16px;
   width: 100%;
   background: #06c755;
   color: #fff;
   border: none;
   border-radius: 8px;
+  margin-top: 10px;
 }
-.sheet {
-  border: 2px solid #ddd;
-  padding: 12px;
-  margin-bottom: 24px;
-  border-radius: 8px;
+.btn-gray {
+  background:#999;
 }
+small { color:#666; }
 </style>
 </head>
 
@@ -31,120 +36,117 @@ button {
 
 <h1>🥞 สั่งเครป</h1>
 
-<!-- ================= แผ่นที่ 1 ================= -->
-<div class="sheet">
-<h2>📄 แผ่นที่ 1</h2>
+<div id="sheets"></div>
 
-<h3>🥞 แป้ง (เลือก 1)</h3>
-<input type="radio" name="flour1" value="แป้งกรอบ|20"> แป้งกรอบ (20)<br>
-<input type="radio" name="flour1" value="แป้งนิ่ม|20"> แป้งนิ่ม (20)<br>
-
-<h3>🍫 แยม (เลือกได้ไม่เกิน 2)</h3>
-<label><input type="checkbox" name="jam1" value="ช็อกโกแลต|0"> ช็อกโกแลต</label><br>
-<label><input type="checkbox" name="jam1" value="สตรอว์เบอร์รี|0"> สตรอว์เบอร์รี</label><br>
-<label><input type="checkbox" name="jam1" value="วนิลา|0"> วนิลา</label><br>
-<label><input type="checkbox" name="jam1" value="ใบเตย|0"> ใบเตย</label><br>
-<label><input type="checkbox" name="jam1" value="ส้ม|0"> ส้ม</label><br>
-<label><input type="checkbox" name="jam1" value="ชาไทย|0"> ชาไทย</label><br>
-<label><input type="checkbox" name="jam1" value="บลูเบอร์รี|0"> บลูเบอร์รี</label><br>
-<label><input type="checkbox" name="jam1" value="พริกเผา|0"> พริกเผา</label><br>
-<label><input type="checkbox" name="jam1" value="นูเทลล่า|15"> นูเทลล่า (+15)</label><br>
-
-<h3>🍌 ท็อปปิ้ง (เลือกได้ไม่เกิน 5)</h3>
-<label><input type="checkbox" name="topping1" value="กล้วย|5"> กล้วย (+5)</label><br>
-<label><input type="checkbox" name="topping1" value="คอนเฟลก|5"> คอนเฟลก (+5)</label><br>
-<label><input type="checkbox" name="topping1" value="โกโก้ครั้นช์|5"> โกโก้ครั้นช์ (+5)</label><br>
-<label><input type="checkbox" name="topping1" value="โอริโอ้บด|5"> โอริโอ้บด (+5)</label><br>
-<label><input type="checkbox" name="topping1" value="ลูกเกด|5"> ลูกเกด (+5)</label><br>
-
-<label><input type="checkbox" name="topping1" value="ฝอยทอง|10"> ฝอยทอง (+10)</label><br>
-<label><input type="checkbox" name="topping1" value="เม็ดมะม่วง|10"> เม็ดมะม่วง (+10)</label><br>
-<label><input type="checkbox" name="topping1" value="เยลลี่แดง|10"> เยลลี่แดง (+10)</label><br>
-<label><input type="checkbox" name="topping1" value="มาร์ชเมลโล|10"> มาร์ชเมลโล (+10)</label><br>
-<label><input type="checkbox" name="topping1" value="หมูหยอง|10"> หมูหยอง (+10)</label><br>
-<label><input type="checkbox" name="topping1" value="ไส้กรอก|10"> ไส้กรอก (+10)</label><br>
-<label><input type="checkbox" name="topping1" value="ปูอัด|10"> ปูอัด (+10)</label><br>
-<label><input type="checkbox" name="topping1" value="ชีส|10"> ชีส (+10)</label><br>
-<label><input type="checkbox" name="topping1" value="ไข่|10"> ไข่ (+10)</label><br>
-<label><input type="checkbox" name="topping1" value="แฮม|10"> แฮม (+10)</label><br>
-
-<h3>🧀 ซอส (เลือกได้ไม่เกิน 3)</h3>
-<label><input type="checkbox" name="sauce1" value="นมข้น|0"> นมข้น</label><br>
-<label><input type="checkbox" name="sauce1" value="ช็อกโกแลต|0"> ช็อกโกแลต</label><br>
-<label><input type="checkbox" name="sauce1" value="ซอสพริก|0"> ซอสพริก</label><br>
-<label><input type="checkbox" name="sauce1" value="มายองเนส|0"> มายองเนส</label><br>
-<label><input type="checkbox" name="sauce1" value="ซอสมะเขือเทศ|0"> ซอสมะเขือเทศ</label><br>
-<label><input type="checkbox" name="sauce1" value="ไม่ราดซอส|0"> ไม่ราดซอส</label><br>
-</div>
-
+<button onclick="addSheet()">➕ เพิ่มแผ่น</button>
+<button class="btn-gray" onclick="removeSheet()">➖ ลบแผ่นล่าสุด</button>
 <button onclick="sendOrder()">ยืนยันสั่งเครป</button>
 
 <script>
 const LIFF_ID = "2008739884-92cBWC4G";
+const MAX_SHEET = 4;
+let sheetCount = 0;
 
 window.onload = async () => {
   await liff.init({ liffId: LIFF_ID });
+  addSheet(); // เริ่มต้นแผ่นที่ 1
 };
 
-function parseItem(v) {
-  const [n, p] = v.split("|");
-  return { name: n, price: Number(p) };
+// ---------- เมนูกลาง ----------
+const flourList = [
+  ["แป้งกรอบ",20],
+  ["แป้งนิ่ม",20]
+];
+
+const jamList = [
+  ["ช็อกโกแลต",0],["สตรอว์เบอร์รี",0],["วนิลา",0],["ใบเตย",0],
+  ["ส้ม",0],["ชาไทย",0],["บลูเบอร์รี",0],["พริกเผา",0],
+  ["นูเทลล่า",15]
+];
+
+const toppingList = [
+  ["กล้วย",5],["คอนเฟลก",5],["โกโก้ครั้นช์",5],["โอริโอ้บด",5],["ลูกเกด",5],
+  ["ฝอยทอง",10],["เม็ดมะม่วง",10],["เยลลี่แดง",10],["มาร์ชเมลโล",10],
+  ["หมูหยอง",10],["ไส้กรอก",10],["ปูอัด",10],["ชีส",10],["ไข่",10],["แฮม",10]
+];
+
+const sauceList = [
+  ["นมข้น",0],["ช็อกโกแลต",0],["ซอสพริก",0],
+  ["มายองเนส",0],["ซอสมะเขือเทศ",0],["ไม่ราดซอส",0]
+];
+
+// ---------- UI ----------
+function addSheet() {
+  if (sheetCount >= MAX_SHEET) return alert("ได้สูงสุด 4 แผ่น");
+  sheetCount++;
+  renderSheet(sheetCount);
 }
 
-function limitCheck(name, max, label) {
-  const c = document.querySelectorAll(`input[name="${name}"]:checked`).length;
-  if (c > max) {
-    alert(`${label} เลือกได้ไม่เกิน ${max} อย่าง`);
-    return false;
-  }
-  return true;
+function removeSheet() {
+  if (sheetCount <= 1) return;
+  document.getElementById(`sheet${sheetCount}`).remove();
+  sheetCount--;
 }
+
+function renderSheet(n) {
+  let html = `
+  <div class="sheet" id="sheet${n}">
+    <h2>📄 แผ่นที่ ${n}</h2>
+
+    <h3>🥞 แป้ง (เลือก 1)</h3>
+    ${flourList.map(f=>`<label><input type="radio" name="flour${n}" value="${f[0]}|${f[1]}"> ${f[0]} (${f[1]})</label><br>`).join("")}
+
+    <h3>🍫 แยม <small>(ไม่เกิน 2)</small></h3>
+    ${jamList.map(j=>`<label><input type="checkbox" name="jam${n}" value="${j[0]}|${j[1]}"> ${j[0]}${j[1]?` (+${j[1]})`:""}</label><br>`).join("")}
+
+    <h3>🍌 ท็อปปิ้ง <small>(ไม่เกิน 5)</small></h3>
+    ${toppingList.map(t=>`<label><input type="checkbox" name="topping${n}" value="${t[0]}|${t[1]}"> ${t[0]} (+${t[1]})</label><br>`).join("")}
+
+    <h3>🧀 ซอส <small>(ไม่เกิน 3)</small></h3>
+    ${sauceList.map(s=>`<label><input type="checkbox" name="sauce${n}" value="${s[0]}|${s[1]}"> ${s[0]}</label><br>`).join("")}
+  </div>`;
+  document.getElementById("sheets").insertAdjacentHTML("beforeend", html);
+}
+
+// ---------- Logic ----------
+function parse(v){ let [n,p]=v.split("|"); return {n, p:+p}; }
+function checked(name){ return document.querySelectorAll(`input[name="${name}"]:checked`); }
 
 async function sendOrder() {
-  if (!liff.isInClient()) {
-    alert("กรุณาเปิดผ่าน LINE");
-    return;
+  if (!liff.isInClient()) return alert("เปิดผ่าน LINE เท่านั้น");
+
+  let msg = "🧾 สรุปรายการสั่งเครป\n\n";
+  let grandTotal = 0;
+
+  for (let i=1;i<=sheetCount;i++) {
+    let flour = document.querySelector(`input[name="flour${i}"]:checked`);
+    if (!flour) return alert(`กรุณาเลือกแป้ง แผ่นที่ ${i}`);
+
+    if (checked(`jam${i}`).length>2) return alert(`แยม แผ่นที่ ${i} เกิน 2`);
+    if (checked(`topping${i}`).length>5) return alert(`ท็อปปิ้ง แผ่นที่ ${i} เกิน 5`);
+    if (checked(`sauce${i}`).length>3) return alert(`ซอส แผ่นที่ ${i} เกิน 3`);
+
+    let total=0;
+    let f=parse(flour.value); total+=f.p;
+
+    let jams=[], tops=[], sauces=[];
+    checked(`jam${i}`).forEach(e=>{let x=parse(e.value); jams.push(x.n); total+=x.p;});
+    checked(`topping${i}`).forEach(e=>{let x=parse(e.value); tops.push(x.n); total+=x.p;});
+    checked(`sauce${i}`).forEach(e=>{sauces.push(parse(e.value).n);});
+
+    grandTotal+=total;
+
+    msg+=`📄 แผ่นที่ ${i}\n`;
+    msg+=`🥞 แป้ง: ${f.n}\n`;
+    msg+=`🍫 แยม: ${jams.join(", ")||"-"}\n`;
+    msg+=`🍌 ท็อปปิ้ง: ${tops.join(", ")||"-"}\n`;
+    msg+=`🧀 ซอส: ${sauces.join(", ")||"-"}\n`;
+    msg+=`💰 รวม: ${total} บาท\n\n`;
   }
 
-  if (
-    !limitCheck("jam1", 2, "แยม") ||
-    !limitCheck("topping1", 5, "ท็อปปิ้ง") ||
-    !limitCheck("sauce1", 3, "ซอส")
-  ) return;
+  msg+=`💳 รวมทั้งหมด ${grandTotal} บาท\n📌 ทางร้านจะยืนยันออเดอร์อีกครั้งครับ`;
 
-  let total = 0;
-  let flourEl = document.querySelector('input[name="flour1"]:checked');
-  if (!flourEl) {
-    alert("กรุณาเลือกแป้ง");
-    return;
-  }
-
-  let flour = parseItem(flourEl.value);
-  total += flour.price;
-
-  let jams=[], toppings=[], sauces=[];
-  document.querySelectorAll('input[name="jam1"]:checked').forEach(e=>{
-    let i=parseItem(e.value); jams.push(i.name); total+=i.price;
-  });
-  document.querySelectorAll('input[name="topping1"]:checked').forEach(e=>{
-    let i=parseItem(e.value); toppings.push(i.name); total+=i.price;
-  });
-  document.querySelectorAll('input[name="sauce1"]:checked').forEach(e=>{
-    sauces.push(parseItem(e.value).name);
-  });
-
-  let msg =
-`🧾 สรุปรายการสั่งเครป
-📄 แผ่นที่ 1
-🥞 แป้ง: ${flour.name}
-🍫 แยม: ${jams.join(", ") || "-"}
-🍌 ท็อปปิ้ง: ${toppings.join(", ") || "-"}
-🧀 ซอส: ${sauces.join(", ") || "-"}
-
-💰 ราคารวม: ${total} บาท
-📌 ทางร้านจะยืนยันออเดอร์อีกครั้งครับ`;
-
-  await liff.sendMessages([{ type: "text", text: msg }]);
+  await liff.sendMessages([{type:"text", text:msg}]);
   liff.closeWindow();
 }
 </script>
