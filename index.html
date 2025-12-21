@@ -12,7 +12,7 @@ body { font-family: sans-serif; padding: 16px; }
 h2 { margin-top: 24px; }
 button {
   padding: 14px;
-  font-size: 18px;
+  font-size: 16px;
   width: 100%;
   background: #06c755;
   color: #fff;
@@ -25,8 +25,8 @@ button {
 <body>
 
 <h2>🥞 เลือกแป้ง</h2>
-<input type="radio" name="base" value="แป้งกรอบ"> แป้งกรอบ<br>
-<input type="radio" name="base" value="แป้งนิ่ม"> แป้งนิ่ม<br>
+<input type="radio" name="flour" value="แป้งกรอบ"> แป้งกรอบ<br>
+<input type="radio" name="flour" value="แป้งนิ่ม"> แป้งนิ่ม<br>
 
 <h2>🍫 แยม</h2>
 <input type="radio" name="jam" value="นูเทลล่า"> นูเทลล่า<br>
@@ -43,9 +43,9 @@ button {
 <input type="checkbox" name="sauce" value="ช็อกโกแลต"> ช็อกโกแลต<br>
 
 <br>
-<!-- ✅ STEP 3 อยู่ตรงนี้ -->
 <button onclick="sendOrder()">ยืนยันสั่งเครป</button>
 
+<!-- ✅ STEP 3 : JavaScript (มีแค่นี้อันเดียวพอ) -->
 <script>
 async function sendOrder() {
   await liff.init({ liffId: "2008739884-Ml1lkrcK" });
@@ -55,25 +55,30 @@ async function sendOrder() {
     return;
   }
 
-  const base = document.querySelector('input[name="base"]:checked')?.value || "-";
-  const jam = document.querySelector('input[name="jam"]:checked')?.value || "-";
+  let flour = document.querySelector('input[name="flour"]:checked')?.value || "-";
+  let jam = document.querySelector('input[name="jam"]:checked')?.value || "-";
 
-  const toppings = [...document.querySelectorAll('input[name="topping"]:checked')]
-    .map(e => e.value).join(", ") || "-";
+  let toppings = [...document.querySelectorAll('input[name="topping"]:checked')]
+    .map(el => el.value)
+    .join(", ") || "-";
 
-  const sauces = [...document.querySelectorAll('input[name="sauce"]:checked')]
-    .map(e => e.value).join(", ") || "-";
+  let sauces = [...document.querySelectorAll('input[name="sauce"]:checked')]
+    .map(el => el.value)
+    .join(", ") || "-";
 
-  const message =
+  let message =
 `🧾 สรุปรายการสั่งเครป
-🥞 แป้ง: ${base}
+🥞 แป้ง: ${flour}
 🍫 แยม: ${jam}
 🍌 ท็อปปิ้ง: ${toppings}
 🍯 ซอส: ${sauces}
 
-📌 ร้านจะสรุปราคาให้อีกครั้งครับ`;
+📌 ร้านจะแจ้งราคาให้อีกครั้งครับ`;
 
-  await liff.sendMessages([{ type: "text", text: message }]);
+  await liff.sendMessages([
+    { type: "text", text: message }
+  ]);
+
   liff.closeWindow();
 }
 </script>
