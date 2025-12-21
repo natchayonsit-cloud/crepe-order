@@ -6,6 +6,7 @@
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 
 <style>
+/* ===== BASE ===== */
 body{
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
   padding:20px;
@@ -13,6 +14,8 @@ body{
   font-size:26px;
   line-height:1.9;
 }
+
+/* ===== CARD ===== */
 .sheet{
   background:#fff;
   padding:26px;
@@ -20,17 +23,24 @@ body{
   margin-bottom:30px;
   box-shadow:0 6px 14px rgba(0,0,0,.12);
 }
-h2{font-size:40px;margin:0 0 20px}
+h2{
+  font-size:40px;
+  margin:0 0 20px;
+}
 .section-title{
   font-size:32px;
   font-weight:bold;
   margin:30px 0 18px;
 }
+
+/* ===== GRID ===== */
 .grid-2{
   display:grid;
   grid-template-columns:1fr 1fr;
   gap:22px;
 }
+
+/* ===== OPTION ===== */
 .option{
   border:2px solid #e0e0e0;
   border-radius:22px;
@@ -49,16 +59,11 @@ h2{font-size:40px;margin:0 0 20px}
 /* ===== STICKY BAR ===== */
 .sticky-bar{
   position:fixed;
-  left:0; right:0; bottom:0;
+  left:0;right:0;bottom:0;
   background:#fff;
   padding:18px 20px 22px;
   box-shadow:0 -6px 16px rgba(0,0,0,.2);
   z-index:999;
-  transition:.25s;
-}
-.sticky-bar.compact{
-  transform:translateY(70%);
-  padding:8px 16px;
 }
 .total-box{
   font-size:34px;
@@ -80,7 +85,8 @@ button{
 
 /* ===== POPUP ===== */
 .popup-bg{
-  position:fixed; inset:0;
+  position:fixed;
+  inset:0;
   background:rgba(0,0,0,.6);
   display:none;
   align-items:center;
@@ -95,8 +101,14 @@ button{
   max-width:420px;
   text-align:center;
 }
-.popup h3{font-size:34px;margin-bottom:20px}
-.popup p{font-size:26px;margin-bottom:24px}
+.popup h3{
+  font-size:34px;
+  margin-bottom:20px;
+}
+.popup p{
+  font-size:26px;
+  margin-bottom:24px;
+}
 .popup button{
   background:#06c755;
   color:#fff;
@@ -112,13 +124,13 @@ button{
 <div class="sticky-bar" id="stickyBar">
   <div class="total-box">💰 ยอดรวม: <span id="total">0</span> บาท</div>
   <button class="btn-add" onclick="addSheet()">➕ เพิ่มแผ่น</button>
-  <button class="btn-random" onclick="randomMenu()">🎲 เมนูสุ่ม</button>
+  <button class="btn-random" onclick="randomMenu()">🎲 เมนูสุ่ม (แป้งกรอบ)</button>
   <button class="btn-submit" onclick="sendOrder()">🧾 สรุป & ชำระเงิน</button>
 </div>
 
 <div class="popup-bg" id="popup">
   <div class="popup">
-    <h3>ℹ️ แจ้งเตือน</h3>
+    <h3>⚠️ แจ้งเตือน</h3>
     <p id="popupText"></p>
     <button onclick="closePopup()">ตกลง</button>
   </div>
@@ -129,41 +141,38 @@ const LIFF_ID="2008739884-92cBWC4G";
 const QR_URL="https://raw.githubusercontent.com/natchayonsit-cloud/crepe-order/main/1766328773945.png";
 
 let sheetCount=0;
-let usedRandom=new Set();
-let lastScroll=0;
 
+/* ===== INIT ===== */
 window.onload=async()=>{
   await liff.init({liffId:LIFF_ID});
   addSheet();
   document.body.addEventListener("change",calcTotal);
   adjustSafeArea();
 };
-
-/* ===== SAFE AREA ===== */
 function adjustSafeArea(){
-  const bar=document.getElementById("stickyBar");
-  document.body.style.paddingBottom=(bar.offsetHeight+40)+"px";
+  document.body.style.paddingBottom =
+    document.getElementById("stickyBar").offsetHeight + 40 + "px";
 }
 window.addEventListener("resize",adjustSafeArea);
 
-/* ===== SCROLL SHRINK ===== */
-window.addEventListener("scroll",()=>{
-  const bar=document.getElementById("stickyBar");
-  const cur=window.scrollY;
-  if(cur>lastScroll && cur>80){
-    bar.classList.add("compact");
-  }else{
-    bar.classList.remove("compact");
-  }
-  lastScroll=cur;
-});
-
 /* ===== POPUP ===== */
 function showPopup(msg){
-  popupText.textContent=msg;
+  popupText.textContent = msg;
   popup.style.display="flex";
 }
-function closePopup(){ popup.style.display="none"; }
+function closePopup(){
+  popup.style.display="none";
+}
+
+/* ===== LIMIT ===== */
+function checkLimit(name,max,label){
+  const c=document.querySelectorAll(`input[name="${name}"]:checked`).length;
+  if(c>max){
+    showPopup(`${label} เลือกได้ไม่เกิน ${max} อย่าง`);
+    return false;
+  }
+  return true;
+}
 
 /* ===== SHEET ===== */
 function addSheet(){
@@ -175,76 +184,34 @@ function addSheet(){
   adjustSafeArea();
 }
 
-/* ===== RANDOM MENU ===== */
+/* ===== RANDOM MENU (แป้งกรอบ 100%) ===== */
 function randomMenu(){
   const i=sheetCount;
 
-  // 🔒 บังคับแป้งกรอบ 100%
-  const flour = "แป้งกรอบ|20";
-
-  const jams=[
-    "ช็อกโกแลต|0","สตรอว์เบอร์รี|0","วนิลา|0","ใบเตย|0",
-    "ส้ม|0","ชาไทย|0","บลูเบอร์รี|0","พริกเผา|0","นูเทลล่า|15"
-  ];
-  const toppings=[
-    "กล้วย|5","ลูกเกด|5","คอนเฟลก|5","โกโก้ครั้นช์|5","โอริโอ้บด|5",
-    "ฝอยทอง|10","เม็ดมะม่วง|10","เยลลี่แดง|10","มาร์ชเมลโล|10",
-    "หมูหยอง|10","ไส้กรอก|10","ปูอัด|10","ชีส|10","ไข่|10","แฮม|10"
-  ];
-  const sauces=[
-    "นมข้น|0","ช็อกโกแลต|0","ซอสพริก|0","มายองเนส|0","ซอสมะเขือเทศ|0","ไม่ราดซอส|0"
-  ];
-
-  let tries=0;
-  while(tries<100){
-    const j=pick(jams);
-    const s=pick(sauces);
-    const topCount=Math.floor(Math.random()*5)+1;
-    const tops=shuffle([...toppings]).slice(0,topCount);
-    const key=flour+j+tops.join()+s;
-    if(!usedRandom.has(key)){
-      usedRandom.add(key);
-      applyRandom(i,flour,j,tops,s);
-      calcTotal();
-      showPopup("🎲 สุ่มเมนูให้อร่อยแล้ว (แป้งกรอบ)");
-      return;
-    }
-    tries++;
-  }
-  usedRandom.clear();
-  showPopup("สุ่มครบทุกสูตรแล้ว เริ่มใหม่ได้อีก 🎉");
-}
-
-function applyRandom(i,f,j,tops,s){
-  document.querySelectorAll(`input[name="flour${i}"]`).forEach(x=>x.checked=false);
-  document.querySelector(`input[name="flour${i}"][value="${f}"]`).checked=true;
-
+  document.querySelector(`input[name="flour${i}"][value="แป้งกรอบ|20"]`).checked=true;
   document.querySelectorAll(`input[name="jam${i}"]`).forEach(x=>x.checked=false);
-  document.querySelector(`input[name="jam${i}"][value="${j}"]`).checked=true;
-
   document.querySelectorAll(`input[name="topping${i}"]`).forEach(x=>x.checked=false);
-  tops.forEach(t=>{
-    document.querySelector(`input[name="topping${i}"][value="${t}"]`).checked=true;
-  });
-
   document.querySelectorAll(`input[name="sauce${i}"]`).forEach(x=>x.checked=false);
-  document.querySelector(`input[name="sauce${i}"][value="${s}"]`).checked=true;
-}
 
-function pick(arr){return arr[Math.floor(Math.random()*arr.length)]}
-function shuffle(a){return a.sort(()=>Math.random()-0.5)}
+  const tops=[...document.querySelectorAll(`input[name="topping${i}"]`)];
+  tops.sort(()=>0.5-Math.random()).slice(0,Math.floor(Math.random()*5)+1)
+    .forEach(x=>x.checked=true);
+
+  calcTotal();
+  showPopup("🎲 สุ่มเมนูให้แล้ว (แป้งกรอบ)");
+}
 
 /* ===== TOTAL ===== */
 function calcTotal(){
   let t=0;
   document.querySelectorAll("input:checked").forEach(e=>{
     const p=+e.value.split("|")[1];
-    if(!isNaN(p))t+=p;
+    if(!isNaN(p)) t+=p;
   });
   total.textContent=t;
 }
 
-/* ===== DATA ===== */
+/* ===== HTML ===== */
 function getSheetHTML(i){
 return `
 <h2>🥞 แผ่นที่ ${i}</h2>
@@ -266,27 +233,19 @@ return `
 `;
 }
 
-/* ✅ แก้ตรงนี้: แยมโชว์ราคาเหมือนท็อปปิ้ง */
+/* ===== DATA ===== */
 function jamList(i){
 const jams=[
-["ช็อกโกแลต",0],
-["สตรอว์เบอร์รี",0],
-["วนิลา",0],
-["ใบเตย",0],
-["ส้ม",0],
-["ชาไทย",0],
-["บลูเบอร์รี",0],
-["พริกเผา",0],
-["นูเทลล่า",15]
+["ช็อกโกแลต",0],["สตรอว์เบอร์รี",0],["วนิลา",0],["ใบเตย",0],
+["ส้ม",0],["ชาไทย",0],["บลูเบอร์รี",0],["พริกเผา",0],["นูเทลล่า",15]
 ];
 return jams.map(j=>
 `<label class="option">
-  <input type="checkbox" name="jam${i}" value="${j[0]}|${j[1]}">
-  ${j[0]} ${j[1]>0?`(+${j[1]})`:""}
+<input type="checkbox" name="jam${i}" value="${j[0]}|${j[1]}">
+${j[0]} ${j[1]>0?`(+${j[1]})`:""}
 </label>`
 ).join("");
 }
-
 function toppingList(i){
 const t=[
 ["กล้วย",5],["ลูกเกด",5],["คอนเฟลก",5],["โกโก้ครั้นช์",5],["โอริโอ้บด",5],
@@ -295,29 +254,71 @@ const t=[
 ];
 return t.map(x=>
 `<label class="option">
-  <input type="checkbox" name="topping${i}" value="${x[0]}|${x[1]}">
-  ${x[0]} (+${x[1]})
+<input type="checkbox" name="topping${i}" value="${x[0]}|${x[1]}">
+${x[0]} (+${x[1]})
 </label>`
 ).join("");
 }
-
 function sauceList(i){
 const s=["นมข้น","ช็อกโกแลต","ซอสพริก","มายองเนส","ซอสมะเขือเทศ","ไม่ราดซอส"];
 return s.map(x=>
 `<label class="option">
-  <input type="checkbox" name="sauce${i}" value="${x}|0">
-  ${x}
+<input type="checkbox" name="sauce${i}" value="${x}|0">
+${x}
 </label>`
 ).join("");
 }
 
-/* ===== SEND ORDER ===== */
+/* ===== SEND ORDER (สรุปครบ) ===== */
 async function sendOrder(){
   if(!liff.isInClient()){showPopup("กรุณาเปิดผ่าน LINE");return}
+
+  let totalPrice=0;
+  let text="🧾 สรุปรายการสั่งเครป\n";
+
+  for(let i=1;i<=sheetCount;i++){
+    if(
+      !checkLimit(`jam${i}`,2,"แยม") ||
+      !checkLimit(`topping${i}`,5,"ท็อปปิ้ง") ||
+      !checkLimit(`sauce${i}`,3,"ซอส")
+    ) return;
+
+    const flour=document.querySelector(`input[name="flour${i}"]:checked`);
+    if(!flour){showPopup(`กรุณาเลือกแป้ง แผ่นที่ ${i}`);return}
+
+    const [fname,fprice]=flour.value.split("|");
+    totalPrice+=+fprice;
+
+    let jams=[],tops=[],sauces=[];
+    document.querySelectorAll(`input[name="jam${i}"]:checked`).forEach(e=>{
+      const [n,p]=e.value.split("|");jams.push(n);totalPrice+=+p;
+    });
+    document.querySelectorAll(`input[name="topping${i}"]:checked`).forEach(e=>{
+      const [n,p]=e.value.split("|");tops.push(n);totalPrice+=+p;
+    });
+    document.querySelectorAll(`input[name="sauce${i}"]:checked`).forEach(e=>{
+      sauces.push(e.value.split("|")[0]);
+    });
+
+    text+=`
+🍽 แผ่นที่ ${i}
+🥞 แป้ง: ${fname}
+🍫 แยม: ${jams.join(", ")||"-"}
+🍌 ท็อปปิ้ง: ${tops.join(", ")||"-"}
+🧀 ซอส: ${sauces.join(", ")||"-"}
+`;
+  }
+
+  text+=`
+💰 ราคารวมทั้งหมด: ${totalPrice} บาท
+📌 กรุณาชำระเงินโดยสแกน QR ด้านล่าง
+`;
+
   await liff.sendMessages([
-    {type:"text",text:"🧾 รับออเดอร์เรียบร้อย"},
+    {type:"text",text},
     {type:"image",originalContentUrl:QR_URL,previewImageUrl:QR_URL}
   ]);
+
   setTimeout(()=>liff.closeWindow(),900);
 }
 </script>
