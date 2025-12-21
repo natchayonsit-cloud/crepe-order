@@ -25,55 +25,83 @@ button {
 <body>
 
 <h2>🥞 เลือกแป้ง</h2>
-<input type="radio" name="flour" value="แป้งกรอบ"> แป้งกรอบ<br>
-<input type="radio" name="flour" value="แป้งนิ่ม"> แป้งนิ่ม<br>
+<input type="radio" name="flour" value="แป้งกรอบ|20"> แป้งกรอบ (20)<br>
+<input type="radio" name="flour" value="แป้งนิ่ม|20"> แป้งนิ่ม (20)<br>
 
 <h2>🍫 แยม</h2>
-<input type="radio" name="jam" value="นูเทลล่า"> นูเทลล่า<br>
-<input type="radio" name="jam" value="ช็อกโกแลต"> ช็อกโกแลต<br>
-<input type="radio" name="jam" value="สตรอว์เบอร์รี"> สตรอว์เบอร์รี<br>
+<input type="radio" name="jam" value="นูเทลล่า|15"> นูเทลล่า (+15)<br>
+<input type="radio" name="jam" value="ช็อกโกแลต|0"> ช็อกโกแลต<br>
+<input type="radio" name="jam" value="สตรอว์เบอร์รี|0"> สตรอว์เบอร์รี<br>
 
 <h2>🍌 ท็อปปิ้ง</h2>
-<input type="checkbox" name="topping" value="กล้วย"> กล้วย<br>
-<input type="checkbox" name="topping" value="ชีส"> ชีส<br>
-<input type="checkbox" name="topping" value="ไข่"> ไข่<br>
+<input type="checkbox" name="topping" value="กล้วย|5"> กล้วย (+5)<br>
+<input type="checkbox" name="topping" value="ชีส|10"> ชีส (+10)<br>
+<input type="checkbox" name="topping" value="ไข่|10"> ไข่ (+10)<br>
 
 <h2>🍯 ซอส</h2>
-<input type="checkbox" name="sauce" value="นมข้น"> นมข้น<br>
-<input type="checkbox" name="sauce" value="ช็อกโกแลต"> ช็อกโกแลต<br>
+<input type="checkbox" name="sauce" value="นมข้น|0"> นมข้น<br>
+<input type="checkbox" name="sauce" value="ช็อกโกแลต|0"> ช็อกโกแลต<br>
 
 <br>
 <button onclick="sendOrder()">ยืนยันสั่งเครป</button>
 
-<!-- ✅ STEP 3 : JavaScript (มีแค่นี้อันเดียวพอ) -->
 <script>
-async function sendOrder() {
-  await liff.init({ liffId: "2008739884-Ml1lkrcK" });
+const LIFF_ID = "2008739884-92cBWC4G";
 
+window.onload = async () => {
+  await liff.init({ liffId: LIFF_ID });
+};
+
+function parseItem(value) {
+  const [name, price] = value.split("|");
+  return { name, price: Number(price) };
+}
+
+async function sendOrder() {
   if (!liff.isInClient()) {
     alert("กรุณาเปิดผ่าน LINE");
     return;
   }
 
-  let flour = document.querySelector('input[name="flour"]:checked')?.value || "-";
-  let jam = document.querySelector('input[name="jam"]:checked')?.value || "-";
+  let total = 0;
 
-  let toppings = [...document.querySelectorAll('input[name="topping"]:checked')]
-    .map(el => el.value)
-    .join(", ") || "-";
+  let flourEl = document.querySelector('input[name="flour"]:checked');
+  let jamEl = document.querySelector('input[name="jam"]:checked');
 
-  let sauces = [...document.querySelectorAll('input[name="sauce"]:checked')]
-    .map(el => el.value)
-    .join(", ") || "-";
+  if (!flourEl) {
+    alert("กรุณาเลือกแป้ง");
+    return;
+  }
+
+  let flour = parseItem(flourEl.value);
+  total += flour.price;
+
+  let jam = jamEl ? parseItem(jamEl.value) : { name: "-", price: 0 };
+  total += jam.price;
+
+  let toppings = [];
+  document.querySelectorAll('input[name="topping"]:checked').forEach(el => {
+    let item = parseItem(el.value);
+    toppings.push(item.name);
+    total += item.price;
+  });
+
+  let sauces = [];
+  document.querySelectorAll('input[name="sauce"]:checked').forEach(el => {
+    let item = parseItem(el.value);
+    sauces.push(item.name);
+    total += item.price;
+  });
 
   let message =
 `🧾 สรุปรายการสั่งเครป
-🥞 แป้ง: ${flour}
-🍫 แยม: ${jam}
-🍌 ท็อปปิ้ง: ${toppings}
-🍯 ซอส: ${sauces}
+🥞 แป้ง: ${flour.name} (${flour.price})
+🍫 แยม: ${jam.name} (${jam.price})
+🍌 ท็อปปิ้ง: ${toppings.join(", ") || "-"}
+🍯 ซอส: ${sauces.join(", ") || "-"}
 
-📌 ร้านจะแจ้งราคาให้อีกครั้งครับ`;
+💰 ราคารวม: ${total} บาท
+📌 ทางร้านจะยืนยันออเดอร์อีกครั้งครับ`;
 
   await liff.sendMessages([
     { type: "text", text: message }
