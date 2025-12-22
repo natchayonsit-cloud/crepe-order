@@ -276,19 +276,37 @@ function addSheet(){
 
 /* ===== RANDOM MENU ===== */
 function randomMenu(){
-  const i=sheetCount;
-  document.querySelector(`input[name="flour${i}"][value="แป้งกรอบ|20"]`).checked=true;
+  const i = sheetCount;
 
+  // ===== แป้งกรอบ 100% =====
+  document.querySelector(`input[name="flour${i}"][value="แป้งกรอบ|20"]`).checked = true;
+
+  // ล้างค่าก่อน
   document.querySelectorAll(`input[name="jam${i}"]`).forEach(x=>x.checked=false);
   document.querySelectorAll(`input[name="topping${i}"]`).forEach(x=>x.checked=false);
   document.querySelectorAll(`input[name="sauce${i}"]`).forEach(x=>x.checked=false);
 
-  const tops=[...document.querySelectorAll(`input[name="topping${i}"]`)];
-  tops.sort(()=>0.5-Math.random()).slice(0,Math.floor(Math.random()*5)+1)
+  // ===== สุ่มแยม 1–2 =====
+  const jams = [...document.querySelectorAll(`input[name="jam${i}"]`)];
+  jams.sort(()=>0.5-Math.random())
+      .slice(0, Math.floor(Math.random()*2)+1)
       .forEach(x=>x.checked=true);
 
+  // ===== สุ่มท็อปปิ้ง 1–5 =====
+  const tops = [...document.querySelectorAll(`input[name="topping${i}"]`)];
+  tops.sort(()=>0.5-Math.random())
+      .slice(0, Math.floor(Math.random()*5)+1)
+      .forEach(x=>x.checked=true);
+
+  // ===== สุ่มซอส 1–2 =====
+  const sauces = [...document.querySelectorAll(`input[name="sauce${i}"]`)]
+                    .filter(x=>!x.value.startsWith("ไม่ราด"));
+  sauces.sort(()=>0.5-Math.random())
+        .slice(0, Math.floor(Math.random()*2)+1)
+        .forEach(x=>x.checked=true);
+
   calcTotal();
-  showPopup("🎲 สุ่มเมนูให้แล้ว (แป้งกรอบ)");
+  showPopup("🎲 สุ่มเมนูให้แล้ว (แป้งกรอบ + แยม + ท็อปปิ้ง + ซอส)");
 }
 
 /* ===== TOTAL ===== */
@@ -413,4 +431,5 @@ async function sendOrder(){
 
 </body>
 </html>
+
 
