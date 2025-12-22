@@ -7,6 +7,7 @@
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 
 <style>
+/* ===== RESET / FULL HEIGHT ===== */
 html, body{
   height:100%;
   margin:0;
@@ -24,8 +25,8 @@ body{
   align-items:flex-start;
 
   padding:32px;
-  padding-bottom:140px;
-  overflow-y:auto;
+  padding-bottom:120px; /* 👈 กันโดนแถบล่าง */
+  overflow-y:auto;      /* 👈 สำคัญมาก */
 }
 
 /* ===== CARD ===== */
@@ -35,6 +36,7 @@ body{
   border-radius:36px;
   box-shadow:0 10px 22px rgba(0,0,0,.15);
   text-align:center;
+
   width:100%;
   max-width:680px;
 }
@@ -49,6 +51,23 @@ p{
   margin-bottom:40px;
 }
 
+/* ===== INPUT ===== */
+label{
+  display:block;
+  font-size:38px;
+  margin-bottom:20px;
+  text-align:left;
+}
+
+input[type="time"]{
+  width:100%;
+  padding:28px;
+  font-size:38px;
+  border-radius:24px;
+  border:3px solid #ddd;
+  margin-bottom:36px;
+}
+
 /* ===== BUTTON ===== */
 button{
   width:100%;
@@ -60,23 +79,17 @@ button{
   font-weight:bold;
 }
 
-.btn-now{background:#0ea5e9;color:#fff;}
-.btn-close{background:#06c755;color:#fff}
-
-/* ===== QUICK TIME ===== */
-.time-grid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:22px;
-  margin-top:20px;
+.btn-now{
+  background:#0ea5e9;
+  color:#fff;
 }
-.time-btn{
-  background:#fde68a;
-  color:#92400e;
-  font-size:38px;
-  padding:30px;
-  border-radius:28px;
-  font-weight:bold;
+.btn-time{
+  background:#f59e0b;
+  color:#fff;
+}
+.btn-close{
+  background:#06c755;
+  color:#fff;
 }
 
 /* ===== DIVIDER ===== */
@@ -107,8 +120,12 @@ hr{
   <hr>
 
   <!-- เลือกเวลา -->
-  <p>⏰ อยากรับประมาณกี่โมง</p>
-  <div class="time-grid" id="timeGrid"></div>
+  <label>⏰ อยากรับประมาณกี่โมง</label>
+  <input type="time" id="pickupTime">
+
+  <button class="btn-time" onclick="askQueueWithTime()">
+    📅 ส่งเวลาที่ต้องการ
+  </button>
 
   <button class="btn-close" onclick="closePage()">
     ปิดหน้านี้
@@ -119,58 +136,10 @@ hr{
 /* 🔴 LIFF ID */
 const LIFF_ID = "2008739884-ruiTGQ9F";
 
-/* ===== CONFIG ===== */
-const OPEN_HOUR = 11;
-const CLOSE_HOUR = 22;
-const STEP_MIN = 30;
-
 /* ===== INIT ===== */
 window.onload = async () => {
   await liff.init({ liffId: LIFF_ID });
-  buildTimeButtons();
 };
-
-/* ===== BUILD TIME BUTTONS ===== */
-function buildTimeButtons(){
-  const grid = document.getElementById("timeGrid");
-  grid.innerHTML = "";
-
-  const now = new Date();
-  const nowMin = now.getHours() * 60 + now.getMinutes();
-  let hasTime = false;
-
-  for(let h = OPEN_HOUR; h <= CLOSE_HOUR; h++){
-    for(let m = 0; m < 60; m += STEP_MIN){
-
-      if(h === CLOSE_HOUR && m > 0) continue;
-
-      const timeMin = h * 60 + m;
-
-      // ซ่อนเวลาที่ผ่านไปแล้ว (เผื่อ 5 นาที)
-      if(timeMin <= nowMin + 5) continue;
-
-      const hh = String(h).padStart(2,"0");
-      const mm = String(m).padStart(2,"0");
-      const t = `${hh}:${mm}`;
-
-      const btn = document.createElement("button");
-      btn.className = "time-btn";
-      btn.textContent = `🕒 ${t}`;
-      btn.onclick = () => sendTime(t);
-
-      grid.appendChild(btn);
-      hasTime = true;
-    }
-  }
-
-  if(!hasTime){
-    const p = document.createElement("p");
-    p.style.fontSize = "36px";
-    p.style.color = "#dc2626";
-    p.textContent = "⛔ วันนี้ร้านปิดรับคิวแล้วครับ";
-    grid.appendChild(p);
-  }
-}
 
 /* ===== ASK QUEUE NOW ===== */
 function askQueueNow(){
@@ -184,13 +153,21 @@ function askQueueNow(){
     text:
 `📩 ขอสอบถามคิวตอนนี้ครับ
 ตอนนี้มีประมาณกี่คิว หรือรอกี่นาทีครับ 🙏`
-  }]).then(()=> setTimeout(()=>liff.closeWindow(),300));
+  }]).then(()=>{
+    setTimeout(()=>liff.closeWindow(),300);
+  });
 }
 
-/* ===== SEND TIME ===== */
-function sendTime(t){
+/* ===== ASK WITH TIME ===== */
+function askQueueWithTime(){
   if(!liff.isInClient()){
     alert("กรุณาเปิดผ่าน LINE");
+    return;
+  }
+
+  const t = document.getElementById("pickupTime").value;
+  if(!t){
+    alert("กรุณาเลือกเวลาก่อนครับ");
     return;
   }
 
@@ -200,7 +177,9 @@ function sendTime(t){
 `📩 ขอสอบถามคิวครับ
 อยากรับประมาณเวลา ${t} น.
 ไม่ทราบว่าสามารถทำได้ไหมครับ 🙏`
-  }]).then(()=> setTimeout(()=>liff.closeWindow(),300));
+  }]).then(()=>{
+    setTimeout(()=>liff.closeWindow(),300);
+  });
 }
 
 /* ===== CLOSE ===== */
