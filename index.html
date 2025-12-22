@@ -15,6 +15,23 @@ body{
   line-height:1.9;
 }
 
+/* ===== PRECHECK ===== */
+.precheck{
+  background:#fff;
+  padding:30px;
+  border-radius:24px;
+  box-shadow:0 6px 14px rgba(0,0,0,.12);
+  text-align:center;
+}
+.precheck h2{
+  font-size:40px;
+  margin-bottom:20px;
+}
+.precheck p{
+  font-size:28px;
+  margin-bottom:30px;
+}
+
 /* ===== CARD ===== */
 .sheet{
   background:#fff;
@@ -82,6 +99,7 @@ button{
 .btn-add{background:#2563eb;color:#fff;font-weight:bold}
 .btn-random{background:#f59e0b;color:#fff;font-weight:bold}
 .btn-submit{background:#06c755;color:#fff;font-weight:bold}
+.btn-ask{background:#0ea5e9;color:#fff;font-weight:bold}
 
 /* ===== POPUP ===== */
 .popup-bg{
@@ -119,15 +137,31 @@ button{
 
 <body>
 
-<div id="sheets"></div>
-
-<div class="sticky-bar" id="stickyBar">
-  <div class="total-box">💰 ยอดรวม: <span id="total">0</span> บาท</div>
-  <button class="btn-add" onclick="addSheet()">➕ เพิ่มแผ่น</button>
-  <button class="btn-random" onclick="randomMenu()">🎲 เมนูสุ่ม (แป้งกรอบ)</button>
-  <button class="btn-submit" onclick="sendOrder()">🧾 สรุป & ชำระเงิน</button>
+<!-- ===== PRECHECK ===== -->
+<div id="precheck" class="precheck">
+  <h2>📌 ก่อนสั่งเครป</h2>
+  <p>
+    ทางร้านทำตามคิวนะครับ 😊<br>
+    กรุณาสอบถามคิวก่อนสั่ง<br>
+    เพื่อทราบว่ารอได้ประมาณกี่โมง
+  </p>
+  <button class="btn-ask" onclick="askQueue()">📩 สอบถามคิวก่อนสั่ง</button>
+  <button class="btn-submit" onclick="enterOrder()">✅ ร้านแจ้งแล้ว → เข้าสั่ง</button>
 </div>
 
+<!-- ===== ORDER ===== -->
+<div id="orderArea" style="display:none">
+  <div id="sheets"></div>
+
+  <div class="sticky-bar" id="stickyBar">
+    <div class="total-box">💰 ยอดรวม: <span id="total">0</span> บาท</div>
+    <button class="btn-add" onclick="addSheet()">➕ เพิ่มแผ่น</button>
+    <button class="btn-random" onclick="randomMenu()">🎲 เมนูสุ่ม (แป้งกรอบ)</button>
+    <button class="btn-submit" onclick="sendOrder()">🧾 สรุป & ชำระเงิน</button>
+  </div>
+</div>
+
+<!-- ===== POPUP ===== -->
 <div class="popup-bg" id="popup">
   <div class="popup">
     <h3>⚠️ แจ้งเตือน</h3>
@@ -145,10 +179,25 @@ let sheetCount=0;
 /* ===== INIT ===== */
 window.onload=async()=>{
   await liff.init({liffId:LIFF_ID});
-  addSheet();
-  document.body.addEventListener("change",calcTotal);
-  adjustSafeArea();
 };
+
+/* ===== PRECHECK LOGIC ===== */
+function askQueue(){
+  liff.sendMessages([{
+    type:"text",
+    text:"📩 ขอสอบถามคิวหน่อยครับ ตอนนี้มีคิวไหม ได้ประมาณกี่โมงครับ 🙏"
+  }]);
+  showPopup("ส่งข้อความสอบถามคิวแล้ว\nรอร้านตอบในแชทก่อนนะครับ 😊");
+}
+
+function enterOrder(){
+  document.getElementById("precheck").style.display="none";
+  document.getElementById("orderArea").style.display="block";
+  if(sheetCount===0) addSheet();
+  adjustSafeArea();
+}
+
+/* ===== SAFE AREA ===== */
 function adjustSafeArea(){
   document.body.style.paddingBottom =
     document.getElementById("stickyBar").offsetHeight + 40 + "px";
@@ -181,21 +230,21 @@ function addSheet(){
   d.className="sheet";
   d.innerHTML=getSheetHTML(sheetCount);
   sheets.appendChild(d);
-  adjustSafeArea();
+  document.body.addEventListener("change",calcTotal);
 }
 
-/* ===== RANDOM MENU (แป้งกรอบ 100%) ===== */
+/* ===== RANDOM MENU ===== */
 function randomMenu(){
   const i=sheetCount;
-
   document.querySelector(`input[name="flour${i}"][value="แป้งกรอบ|20"]`).checked=true;
+
   document.querySelectorAll(`input[name="jam${i}"]`).forEach(x=>x.checked=false);
   document.querySelectorAll(`input[name="topping${i}"]`).forEach(x=>x.checked=false);
   document.querySelectorAll(`input[name="sauce${i}"]`).forEach(x=>x.checked=false);
 
   const tops=[...document.querySelectorAll(`input[name="topping${i}"]`)];
   tops.sort(()=>0.5-Math.random()).slice(0,Math.floor(Math.random()*5)+1)
-    .forEach(x=>x.checked=true);
+      .forEach(x=>x.checked=true);
 
   calcTotal();
   showPopup("🎲 สุ่มเมนูให้แล้ว (แป้งกรอบ)");
@@ -211,7 +260,7 @@ function calcTotal(){
   total.textContent=t;
 }
 
-/* ===== HTML ===== */
+/* ===== HTML DATA (เหมือนเดิมทุกอย่าง) ===== */
 function getSheetHTML(i){
 return `
 <h2>🥞 แผ่นที่ ${i}</h2>
@@ -233,43 +282,41 @@ return `
 `;
 }
 
-/* ===== DATA ===== */
 function jamList(i){
 const jams=[
 ["ช็อกโกแลต",0],["สตรอว์เบอร์รี",0],["วนิลา",0],["ใบเตย",0],
 ["ส้ม",0],["ชาไทย",0],["บลูเบอร์รี",0],["พริกเผา",0],["นูเทลล่า",15]
 ];
-return jams.map(j=>
-`<label class="option">
+return jams.map(j=>`
+<label class="option">
 <input type="checkbox" name="jam${i}" value="${j[0]}|${j[1]}">
 ${j[0]} ${j[1]>0?`(+${j[1]})`:""}
-</label>`
-).join("");
+</label>`).join("");
 }
+
 function toppingList(i){
 const t=[
 ["กล้วย",5],["ลูกเกด",5],["คอนเฟลก",5],["โกโก้ครั้นช์",5],["โอริโอ้บด",5],
 ["ฝอยทอง",10],["เม็ดมะม่วง",10],["เยลลี่แดง",10],["มาร์ชเมลโล",10],
 ["หมูหยอง",10],["ไส้กรอก",10],["ปูอัด",10],["ชีส",10],["ไข่",10],["แฮม",10]
 ];
-return t.map(x=>
-`<label class="option">
+return t.map(x=>`
+<label class="option">
 <input type="checkbox" name="topping${i}" value="${x[0]}|${x[1]}">
 ${x[0]} (+${x[1]})
-</label>`
-).join("");
-}
-function sauceList(i){
-const s=["นมข้น","ช็อกโกแลต","ซอสพริก","มายองเนส","ซอสมะเขือเทศ","ไม่ราดซอส"];
-return s.map(x=>
-`<label class="option">
-<input type="checkbox" name="sauce${i}" value="${x}|0">
-${x}
-</label>`
-).join("");
+</label>`).join("");
 }
 
-/* ===== SEND ORDER (สรุปครบ) ===== */
+function sauceList(i){
+const s=["นมข้น","ช็อกโกแลต","ซอสพริก","มายองเนส","ซอสมะเขือเทศ","ไม่ราดซอส"];
+return s.map(x=>`
+<label class="option">
+<input type="checkbox" name="sauce${i}" value="${x}|0">
+${x}
+</label>`).join("");
+}
+
+/* ===== SEND ORDER ===== */
 async function sendOrder(){
   if(!liff.isInClient()){showPopup("กรุณาเปิดผ่าน LINE");return}
 
