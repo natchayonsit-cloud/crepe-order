@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>สอบถามคิวเครป</title>
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+
+<style>
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  background:#f2f3f5;
+  padding:20px;
+  font-size:24px;
+  line-height:1.8;
+}
+
+.card{
+  background:#fff;
+  padding:30px;
+  border-radius:24px;
+  box-shadow:0 6px 14px rgba(0,0,0,.12);
+  text-align:center;
+}
+
+h2{
+  font-size:36px;
+  margin-bottom:16px;
+}
+
+p{
+  font-size:26px;
+  margin-bottom:24px;
+}
+
+label{
+  display:block;
+  font-size:24px;
+  margin-bottom:10px;
+  text-align:left;
+}
+
+input[type="time"]{
+  width:100%;
+  padding:18px;
+  font-size:24px;
+  border-radius:16px;
+  border:2px solid #ddd;
+  margin-bottom:20px;
+}
+
+button{
+  width:100%;
+  padding:22px;
+  font-size:26px;
+  border-radius:22px;
+  border:none;
+  margin-top:12px;
+  font-weight:bold;
+}
+
+.btn-now{background:#0ea5e9;color:#fff}
+.btn-time{background:#f59e0b;color:#fff}
+.btn-close{background:#06c755;color:#fff}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+  <h2>📌 สอบถามคิวเครป</h2>
+  <p>
+    ทางร้านทำตามคิวครับ 😊<br>
+    เลือกวิธีสอบถามได้เลย
+  </p>
+
+  <!-- ปุ่มถามคิวตอนนี้ -->
+  <button class="btn-now" onclick="askQueueNow()">
+    📩 สอบถามคิวตอนนี้
+  </button>
+
+  <hr style="margin:30px 0">
+
+  <!-- เลือกเวลา -->
+  <label>⏰ อยากรับประมาณกี่โมง</label>
+  <input type="time" id="pickupTime">
+
+  <button class="btn-time" onclick="askQueueWithTime()">
+    📅 ส่งเวลาที่ต้องการ
+  </button>
+
+  <button class="btn-close" onclick="closePage()">
+    ปิดหน้านี้
+  </button>
+</div>
+
+<script>
+/* 🔴 ใส่ LIFF ID ใหม่ของ SitCrepe Queue */
+const LIFF_ID = "2008739884-ruiTGQ9F";
+
+/* ===== INIT ===== */
+window.onload = async () => {
+  await liff.init({ liffId: LIFF_ID });
+};
+
+/* ===== ASK QUEUE NOW ===== */
+function askQueueNow(){
+  if(!liff.isInClient()){
+    alert("กรุณาเปิดผ่าน LINE");
+    return;
+  }
+
+  liff.sendMessages([{
+    type:"text",
+    text:
+`📩 ขอสอบถามคิวตอนนี้ครับ
+ตอนนี้มีประมาณกี่คิว หรือรอกี่นาทีครับ 🙏`
+  }]).then(()=>{
+    setTimeout(()=>liff.closeWindow(),300);
+  });
+}
+
+/* ===== ASK WITH TIME ===== */
+function askQueueWithTime(){
+  if(!liff.isInClient()){
+    alert("กรุณาเปิดผ่าน LINE");
+    return;
+  }
+
+  const t = document.getElementById("pickupTime").value;
+  if(!t){
+    alert("กรุณาเลือกเวลาก่อนครับ");
+    return;
+  }
+
+  liff.sendMessages([{
+    type:"text",
+    text:
+`📩 ขอสอบถามคิวครับ
+อยากรับประมาณเวลา ${t} น.
+ไม่ทราบว่าสามารถทำได้ไหมครับ 🙏`
+  }]).then(()=>{
+    setTimeout(()=>liff.closeWindow(),300);
+  });
+}
+
+/* ===== CLOSE ===== */
+function closePage(){
+  liff.closeWindow();
+}
+</script>
+
+</body>
+</html>
