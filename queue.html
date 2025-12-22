@@ -2,108 +2,65 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>สอบถามคิวเครป</title>
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 
 <style>
-html, body{
-  height:100%;
-  margin:0;
-}
-
 body{
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
   background:#f2f3f5;
-
-  font-size:28px;          /* 👈 ใหญ่ อ่านง่าย */
-  line-height:1.6;
-
-  display:flex;
-  justify-content:center;
-  align-items:flex-start;
-
   padding:20px;
-  overflow-y:auto;         /* 👈 เลื่อนได้ (จำเป็น) */
+  font-size:24px;
+  line-height:1.8;
 }
 
-/* ===== CARD ===== */
 .card{
   background:#fff;
-  padding:28px;
-  border-radius:28px;
-  box-shadow:0 6px 16px rgba(0,0,0,.15);
-
-  width:100%;
-  max-width:600px;
+  padding:30px;
+  border-radius:24px;
+  box-shadow:0 6px 14px rgba(0,0,0,.12);
   text-align:center;
 }
 
-/* ===== TEXT ===== */
 h2{
-  font-size:42px;
+  font-size:36px;
   margin-bottom:16px;
-  line-height:1.4;
 }
 
 p{
-  font-size:30px;
+  font-size:26px;
+  margin-bottom:24px;
+}
+
+label{
+  display:block;
+  font-size:24px;
+  margin-bottom:10px;
+  text-align:left;
+}
+
+input[type="time"]{
+  width:100%;
+  padding:18px;
+  font-size:24px;
+  border-radius:16px;
+  border:2px solid #ddd;
   margin-bottom:20px;
 }
 
-/* ===== BUTTON ===== */
 button{
   width:100%;
-  padding:24px;
-  font-size:30px;
+  padding:22px;
+  font-size:26px;
   border-radius:22px;
   border:none;
-  margin-top:14px;
+  margin-top:12px;
   font-weight:bold;
 }
 
-.btn-now{
-  background:#0ea5e9;
-  color:#fff;
-}
-
-.btn-time{
-  background:#f59e0b;
-  color:#fff;
-}
-
-.btn-close{
-  background:#06c755;
-  color:#fff;
-}
-
-/* ===== QUICK TIME GRID ===== */
-.time-title{
-  font-size:30px;
-  margin:22px 0 12px;
-}
-
-.time-grid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:14px;
-}
-
-.time-btn{
-  background:#fde68a;
-  color:#92400e;
-  font-size:28px;
-  padding:20px;
-  border-radius:20px;
-  font-weight:bold;
-}
-
-/* ===== DIVIDER ===== */
-hr{
-  margin:26px 0;
-  border:none;
-  border-top:2px dashed #ddd;
-}
+.btn-now{background:#0ea5e9;color:#fff}
+.btn-time{background:#f59e0b;color:#fff}
+.btn-close{background:#06c755;color:#fff}
 </style>
 </head>
 
@@ -115,21 +72,24 @@ hr{
   <p>
     ทางร้านทำตามคิวครับ 😊<br>
     เลือกวิธีสอบถามได้เลย<br>
-    ร้านจะตอบกลับโดยประมาณภายในไม่กี่นาทีครับ 🙏<br><br>
-    ⏰ <strong>เปิด 11:00 – 22:00</strong>
+    ร้านจะตอบกลับโดยประมาณภายในไม่กี่นาทีครับ 🙏<br>
+    ⏰ เปิด 11:00 – 22:00
   </p>
 
-  <!-- ถามคิวตอนนี้ -->
+  <!-- ปุ่มถามคิวตอนนี้ -->
   <button class="btn-now" onclick="askQueueNow()">
     📩 สอบถามคิวตอนนี้
   </button>
 
-  <hr>
+  <hr style="margin:30px 0">
 
-  <!-- เลือกเวลาแบบกดเร็ว -->
-  <div class="time-title">⏰ อยากรับประมาณกี่โมง</div>
+  <!-- เลือกเวลา -->
+  <label>⏰ อยากรับประมาณกี่โมง</label>
+  <input type="time" id="pickupTime">
 
-  <div class="time-grid" id="timeGrid"></div>
+  <button class="btn-time" onclick="askQueueWithTime()">
+    📅 ส่งเวลาที่ต้องการ
+  </button>
 
   <button class="btn-close" onclick="closePage()">
     ปิดหน้านี้
@@ -137,13 +97,12 @@ hr{
 </div>
 
 <script>
-/* 🔴 LIFF ID (สอบถามคิว) */
+/* 🔴 LIFF ID */
 const LIFF_ID = "2008739884-ruiTGQ9F";
 
 /* ===== INIT ===== */
 window.onload = async () => {
   await liff.init({ liffId: LIFF_ID });
-  renderTimeButtons();
 };
 
 /* ===== ASK QUEUE NOW ===== */
@@ -163,10 +122,16 @@ function askQueueNow(){
   });
 }
 
-/* ===== QUICK TIME ===== */
-function sendTime(t){
+/* ===== ASK WITH TIME ===== */
+function askQueueWithTime(){
   if(!liff.isInClient()){
     alert("กรุณาเปิดผ่าน LINE");
+    return;
+  }
+
+  const t = document.getElementById("pickupTime").value;
+  if(!t){
+    alert("กรุณาเลือกเวลาก่อนครับ");
     return;
   }
 
@@ -179,36 +144,6 @@ function sendTime(t){
   }]).then(()=>{
     setTimeout(()=>liff.closeWindow(),300);
   });
-}
-
-/* ===== GENERATE TIME BUTTONS ===== */
-function renderTimeButtons(){
-  const grid = document.getElementById("timeGrid");
-
-  const openHour = 11;
-  const closeHour = 22;
-  const interval = 30; // นาที
-
-  const now = new Date();
-  const currentMinutes = now.getHours() * 60 + now.getMinutes();
-
-  for(let h = openHour; h < closeHour; h++){
-    for(let m = 0; m < 60; m += interval){
-      const totalMin = h * 60 + m;
-      if(totalMin <= currentMinutes) continue; // ซ่อนเวลาที่ผ่านไปแล้ว
-
-      const hh = String(h).padStart(2,"0");
-      const mm = String(m).padStart(2,"0");
-      const t = `${hh}:${mm}`;
-
-      const btn = document.createElement("button");
-      btn.className = "time-btn";
-      btn.textContent = `🕒 ${t}`;
-      btn.onclick = ()=>sendTime(t);
-
-      grid.appendChild(btn);
-    }
-  }
 }
 
 /* ===== CLOSE ===== */
