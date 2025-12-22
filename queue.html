@@ -61,7 +61,6 @@ button{
 }
 
 .btn-now{background:#0ea5e9;color:#fff;}
-.btn-time{background:#f59e0b;color:#fff;}
 .btn-close{background:#06c755;color:#fff}
 
 /* ===== QUICK TIME ===== */
@@ -107,17 +106,9 @@ hr{
 
   <hr>
 
-  <!-- เลือกเวลาแบบกดเร็ว -->
+  <!-- เลือกเวลา -->
   <p>⏰ อยากรับประมาณกี่โมง</p>
-
-  <div class="time-grid">
-    <button class="time-btn" onclick="sendTime('17:30')">🕠 17:30</button>
-    <button class="time-btn" onclick="sendTime('18:00')">🕕 18:00</button>
-    <button class="time-btn" onclick="sendTime('18:30')">🕡 18:30</button>
-    <button class="time-btn" onclick="sendTime('19:00')">🕖 19:00</button>
-    <button class="time-btn" onclick="sendTime('19:30')">🕢 19:30</button>
-    <button class="time-btn" onclick="sendTime('20:00')">🕗 20:00</button>
-  </div>
+  <div class="time-grid" id="timeGrid"></div>
 
   <button class="btn-close" onclick="closePage()">
     ปิดหน้านี้
@@ -128,10 +119,58 @@ hr{
 /* 🔴 LIFF ID */
 const LIFF_ID = "2008739884-ruiTGQ9F";
 
+/* ===== CONFIG ===== */
+const OPEN_HOUR = 11;
+const CLOSE_HOUR = 22;
+const STEP_MIN = 30;
+
 /* ===== INIT ===== */
 window.onload = async () => {
   await liff.init({ liffId: LIFF_ID });
+  buildTimeButtons();
 };
+
+/* ===== BUILD TIME BUTTONS ===== */
+function buildTimeButtons(){
+  const grid = document.getElementById("timeGrid");
+  grid.innerHTML = "";
+
+  const now = new Date();
+  const nowMin = now.getHours() * 60 + now.getMinutes();
+  let hasTime = false;
+
+  for(let h = OPEN_HOUR; h <= CLOSE_HOUR; h++){
+    for(let m = 0; m < 60; m += STEP_MIN){
+
+      if(h === CLOSE_HOUR && m > 0) continue;
+
+      const timeMin = h * 60 + m;
+
+      // ซ่อนเวลาที่ผ่านไปแล้ว (เผื่อ 5 นาที)
+      if(timeMin <= nowMin + 5) continue;
+
+      const hh = String(h).padStart(2,"0");
+      const mm = String(m).padStart(2,"0");
+      const t = `${hh}:${mm}`;
+
+      const btn = document.createElement("button");
+      btn.className = "time-btn";
+      btn.textContent = `🕒 ${t}`;
+      btn.onclick = () => sendTime(t);
+
+      grid.appendChild(btn);
+      hasTime = true;
+    }
+  }
+
+  if(!hasTime){
+    const p = document.createElement("p");
+    p.style.fontSize = "36px";
+    p.style.color = "#dc2626";
+    p.textContent = "⛔ วันนี้ร้านปิดรับคิวแล้วครับ";
+    grid.appendChild(p);
+  }
+}
 
 /* ===== ASK QUEUE NOW ===== */
 function askQueueNow(){
@@ -145,12 +184,10 @@ function askQueueNow(){
     text:
 `📩 ขอสอบถามคิวตอนนี้ครับ
 ตอนนี้มีประมาณกี่คิว หรือรอกี่นาทีครับ 🙏`
-  }]).then(()=>{
-    setTimeout(()=>liff.closeWindow(),300);
-  });
+  }]).then(()=> setTimeout(()=>liff.closeWindow(),300));
 }
 
-/* ===== SEND QUICK TIME ===== */
+/* ===== SEND TIME ===== */
 function sendTime(t){
   if(!liff.isInClient()){
     alert("กรุณาเปิดผ่าน LINE");
@@ -162,4 +199,15 @@ function sendTime(t){
     text:
 `📩 ขอสอบถามคิวครับ
 อยากรับประมาณเวลา ${t} น.
-ไม่
+ไม่ทราบว่าสามารถทำได้ไหมครับ 🙏`
+  }]).then(()=> setTimeout(()=>liff.closeWindow(),300));
+}
+
+/* ===== CLOSE ===== */
+function closePage(){
+  liff.closeWindow();
+}
+</script>
+
+</body>
+</html>
