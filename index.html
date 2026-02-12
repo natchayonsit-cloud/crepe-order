@@ -181,11 +181,21 @@ function checkLimit(name,max,label){
 /* ===== SHEET ===== */
 function addSheet(){
   sheetCount++;
-  const d=document.createElement("div");
-  d.className="sheet";
-  d.innerHTML=getSheetHTML(sheetCount);
+
+  const d = document.createElement("div");
+  d.className = "sheet";
+  d.id = "sheet" + sheetCount;   // ให้มี id ไว้เลื่อนหา
+  d.innerHTML = getSheetHTML(sheetCount);
+
   sheets.appendChild(d);
+
+  // ⬇️ เลื่อนหน้าจอไปยังแผ่นใหม่
+  setTimeout(()=>{
+    document.getElementById("sheet"+sheetCount)
+      .scrollIntoView({behavior:"smooth"});
+  },100);
 }
+
 
 /* ===== RANDOM MENU ===== */
 function randomMenu(){
@@ -346,6 +356,7 @@ async function sendOrder(){
 
 </body>
 </html>
+
 
 
 
