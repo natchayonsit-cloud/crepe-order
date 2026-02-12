@@ -271,13 +271,24 @@ ${x[0]} (+${x[1]})
 }
 
 function sauceList(i){
-const s=["นมข้น","ช็อกโกแลต","ซอสพริก","มายองเนส","ซอสมะเขือเทศ","ทาโกะยากิ","ไม่ราดซอส"];
+const s=[
+  ["นมข้น",0],
+  ["ช็อกโกแลต",0],
+  ["ซอสพริก",0],
+  ["มายองเนส",0],
+  ["ซอสมะเขือเทศ",0],
+  ["ทาโกะยากิ",0],
+  ["น้ำสลัด",5],
+  ["ไม่ราดซอส",0]
+];
+
 return s.map(x=>`
 <label class="option">
-<input type="checkbox" name="sauce${i}" value="${x}|0">
-${x}
+<input type="checkbox" name="sauce${i}" value="${x[0]}|${x[1]}">
+${x[0]} ${x[1]>0?`(+${x[1]})`:""}
 </label>`).join("");
 }
+
 
 /* ===== SEND ORDER ===== */
 async function sendOrder(){
@@ -335,5 +346,6 @@ async function sendOrder(){
 
 </body>
 </html>
+
 
 
